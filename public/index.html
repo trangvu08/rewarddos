@@ -938,7 +938,7 @@ async function sendMessage() {
   try {
     const resp=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({max_tokens:2500,system:buildSystemPrompt(),messages})
+      body:JSON.stringify({max_tokens:4000,system:buildSystemPrompt(),messages})
     });
 
     if (resp.status === 429) {
@@ -1660,6 +1660,14 @@ evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trướ
 flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner").
 memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).
 memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Điều KHÔNG nên làm, Rủi ro, Kế hoạch hành động 30 ngày.
+
+QUY TẮC TÁCH BIỆT BẮT BUỘC GIỮA "message" VÀ "memo" — VI PHẠM QUY TẮC NÀY LÀ LỖI NGHIÊM TRỌNG NHẤT:
+- Trường "message" và trường "memo" PHẢI HOÀN TOÀN TÁCH BIỆT. Đây không phải gợi ý — đây là ràng buộc cứng.
+- "message" KHÔNG BAO GIỜ được chứa: bảng (table), danh sách bước (Bước 1, Bước 2...), tiêu đề HÀNH ĐỘNG KHUYẾN NGHỊ, hoặc bất kỳ nội dung dài có cấu trúc giống bản ghi nhớ.
+- Khi memoReady chuyển từ false sang true (tức là Giai đoạn 3 vừa hoàn thành), "message" CHỈ được viết một đoạn ngắn 2-3 câu xác nhận đã đủ thông tin và đã sẵn sàng tạo bản ghi nhớ — ví dụ: "Tôi đã có đủ thông tin để đưa ra khuyến nghị. Dựa trên bằng chứng, vấn đề chính là [tóm tắt 1 câu]. Bấm nút 'Tạo Bản Ghi Nhớ Quyết Định' để xem đầy đủ phân tích và kế hoạch hành động."
+- TOÀN BỘ nội dung dài — bảng đánh giá nguyên nhân, danh sách bằng chứng chi tiết, các bước khuyến nghị theo thứ tự, kế hoạch 30 ngày — chỉ được viết trong trường "memo" dưới dạng HTML, KHÔNG ĐƯỢC viết lại hoặc lặp lại trong "message".
+- Nếu bạn thấy "message" đang dài hơn 4-5 câu hoặc có định dạng bảng/danh sách số thứ tự dài — đây là dấu hiệu bạn đang nhồi nhầm nội dung memo vào message. Dừng lại, cắt ngắn message, chuyển toàn bộ nội dung chi tiết sang field memo.
+- Lý do bắt buộc: message bị giới hạn độ dài hiển thị và token, nội dung dài bị nhồi vào đó sẽ bị cắt cụt giữa câu, gây lỗi hiển thị nghiêm trọng cho người dùng.
 
 Trường "message" là những gì người dùng thấy. Hãy rõ ràng, trực tiếp, như một cố vấn có 20 năm kinh nghiệm. Ngắn gọn nhưng đầy đủ.
 
