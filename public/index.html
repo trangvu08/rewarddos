@@ -9,19 +9,19 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:          #140F09;
-    --card:        #1F1710;
-    --card-mid:    #2B2018;
+    --bg:          #FBF8F1;
+    --card:        #FFFFFF;
+    --card-mid:    #F1EADD;
     --red:         #C0392B;
-    --red-dim:     rgba(192,57,43,0.15);
-    --red-border:  rgba(192,57,43,0.35);
-    --cream:       #F0EAD6;
-    --cream-dim:   rgba(240,234,214,0.6);
-    --cream-muted: rgba(240,234,214,0.32);
-    --gold:        #C9922A;
-    --green:       #4CAF82;
-    --border:      rgba(240,234,214,0.09);
-    --border-warm: rgba(201,146,42,0.2);
+    --red-dim:     rgba(192,57,43,0.10);
+    --red-border:  rgba(192,57,43,0.28);
+    --cream:       #241B12;
+    --cream-dim:   rgba(36,27,18,0.70);
+    --cream-muted: rgba(36,27,18,0.45);
+    --gold:        #A06C12;
+    --green:       #2E9D6B;
+    --border:      rgba(36,27,18,0.12);
+    --border-warm: rgba(160,108,18,0.32);
   }
 
   body {
@@ -40,7 +40,7 @@
     padding: 13px 20px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
-    background: rgba(20,15,9,0.85);
+    background: rgba(251,248,241,0.85);
     backdrop-filter: blur(8px);
     gap: 12px;
   }
@@ -63,10 +63,13 @@
   .logo { display: flex; align-items: center; gap: 10px; }
 
   .logo-badge {
-    width: 30px; height: 30px;
-    background: var(--red); border-radius: 7px;
+    height: 34px; padding: 4px 9px;
+    background: #FFFFFF; border: 1px solid var(--red-border);
+    border-radius: 8px;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    box-shadow: 0 1px 5px rgba(192,57,43,0.14);
   }
+  .logo-img { height: 24px; width: auto; display: block; }
 
   .logo-title {
     font-family: 'Be Vietnam Pro',sans-serif;
@@ -278,7 +281,7 @@
   .diag-panel {
     width: 300px; flex-shrink: 0; display: flex; flex-direction: column;
     overflow-y: auto; padding: 18px 16px; gap: 14px;
-    background: rgba(20,15,9,0.5);
+    background: rgba(241,234,221,0.45);
   }
   .diag-panel::-webkit-scrollbar { width: 4px; }
   .diag-panel::-webkit-scrollbar-thumb { background: var(--card-mid); border-radius: 2px; }
@@ -305,7 +308,7 @@
   .cause-label-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
   .cause-label { font-size: 12px; color: var(--cream-dim); }
   .cause-pct   { font-size: 11px; font-weight: 600; color: var(--gold); }
-  .cause-bar-track { height: 5px; background: rgba(240,234,214,0.07); border-radius: 3px; overflow: hidden; }
+  .cause-bar-track { height: 5px; background: rgba(36,27,18,0.08); border-radius: 3px; overflow: hidden; }
   .cause-bar-fill  { height: 100%; border-radius: 3px; width: 0%; transition: width 1s cubic-bezier(0.4,0,0.2,1); background: var(--gold); }
   .cause-bar-fill.low  { background: var(--card-mid); }
   .cause-bar-fill.mid  { background: #8B6520; }
@@ -355,7 +358,7 @@
 
   /* ── MODAL ── */
   .modal-overlay {
-    position: fixed; inset: 0; background: rgba(20,15,9,0.88);
+    position: fixed; inset: 0; background: rgba(36,27,18,0.45);
     display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px;
   }
   .modal-overlay.open { display: flex; }
@@ -397,12 +400,10 @@
     </button>
     <div class="logo">
       <div class="logo-badge">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img src="clarity-logo-cropped.png" alt="Clarity Intelligence" class="logo-img">
       </div>
       <div>
-        <div class="logo-title" id="logo-title">Hệ Thống Quyết Định Lương</div>
+        <div class="logo-title" id="logo-title">Hệ thống Quyết định trong Lương thưởng</div>
         <div class="logo-sub"  id="logo-sub">Rewards Decision OS</div>
       </div>
     </div>
@@ -556,7 +557,7 @@ let sidebarOpen = false;
 // ─── TRANSLATIONS ──────────────────────────────────────────────
 const T = {
   vi: {
-    logoTitle:'Hệ Thống Quyết Định Lương', logoSub:'Rewards Decision OS',
+    logoTitle:'Hệ thống Quyết định trong Lương thưởng', logoSub:'Rewards Decision OS',
     newCase:'+ Ca mới', saveBtnLabel:'Lưu ca này', sidebarTitle:'Lịch sử ca',
     sidebarEmpty:'Chưa có ca nào được lưu.',
     phases:['1. Vấn đề','2. Chẩn đoán','3. Bằng chứng','4. Khuyến nghị','5. Bản ghi nhớ'],
