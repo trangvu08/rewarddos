@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hệ Thống Quyết Định Lương Thưởng</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          #140F09;
+    --card:        #1F1710;
+    --card-mid:    #2B2018;
+    --red:         #C0392B;
+    --red-dim:     rgba(192,57,43,0.15);
+    --red-border:  rgba(192,57,43,0.35);
+    --cream:       #F0EAD6;
+    --cream-dim:   rgba(240,234,214,0.6);
+    --cream-muted: rgba(240,234,214,0.32);
+    --gold:        #C9922A;
+    --green:       #4CAF82;
+    --border:      rgba(240,234,214,0.09);
+    --border-warm: rgba(201,146,42,0.2);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Be Vietnam Pro','Inter',sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    background: rgba(20,15,9,0.85);
+    backdrop-filter: blur(8px);
+    gap: 12px;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 10px; }
+
+  .cases-toggle-btn {
+    width: 34px; height: 34px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; transition: all 0.2s;
+    color: var(--cream-dim);
+  }
+  .cases-toggle-btn:hover, .cases-toggle-btn.active {
+    border-color: var(--border-warm); color: var(--gold);
+  }
+
+  .logo { display: flex; align-items: center; gap: 10px; }
+
+  .logo-badge {
+    width: 30px; height: 30px;
+    background: var(--red); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+
+  .logo-title {
+    font-family: 'Be Vietnam Pro',sans-serif;
+    font-size: 14px; font-weight: 600;
+    color: var(--cream); letter-spacing: -0.2px; line-height: 1.2;
+  }
+  .logo-sub { font-size: 10px; color: var(--cream-muted); letter-spacing: 0.3px; margin-top: 1px; }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .save-btn {
+    padding: 6px 13px;
+    background: transparent;
+    border: 1px solid var(--border-warm);
+    border-radius: 6px; color: var(--gold);
+    font-size: 12px; font-family: 'Be Vietnam Pro',sans-serif;
+    cursor: pointer; transition: all 0.2s;
+    display: none;
+  }
+  .save-btn:hover { background: var(--red-dim); border-color: var(--red); color: var(--cream); }
+  .save-btn.visible { display: block; }
+
+  .lang-toggle {
+    display: flex; background: var(--card);
+    border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+  }
+  .lang-btn {
+    padding: 5px 10px; font-size: 11px; font-weight: 500;
+    color: var(--cream-muted); background: transparent; border: none;
+    cursor: pointer; transition: all 0.2s; font-family: 'Be Vietnam Pro',sans-serif;
+  }
+  .lang-btn.active { background: var(--red); color: #fff; }
+
+  .new-case-btn {
+    padding: 6px 12px; background: transparent;
+    border: 1px solid var(--border); border-radius: 6px;
+    color: var(--cream-dim); font-size: 12px;
+    font-family: 'Be Vietnam Pro',sans-serif; cursor: pointer; transition: all 0.2s;
+  }
+  .new-case-btn:hover { border-color: var(--border-warm); color: var(--gold); }
+
+  /* ── BODY LAYOUT ── */
+  .body-wrap {
+    display: flex; flex: 1; overflow: hidden; position: relative;
+  }
+
+  /* ── CASES SIDEBAR ── */
+  .cases-sidebar {
+    width: 0; flex-shrink: 0;
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.4,0,0.2,1);
+  }
+  .cases-sidebar.open { width: 260px; }
+
+  .sidebar-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .sidebar-title {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 1.2px; color: var(--cream-muted);
+    text-transform: uppercase;
+  }
+
+  .cases-list {
+    flex: 1; overflow-y: auto; padding: 8px;
+  }
+  .cases-list::-webkit-scrollbar { width: 3px; }
+  .cases-list::-webkit-scrollbar-thumb { background: var(--card-mid); border-radius: 2px; }
+
+  .case-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+    position: relative;
+  }
+  .case-item:hover { background: var(--card-mid); }
+  .case-item.active { background: var(--card-mid); border-color: var(--border-warm); }
+
+  .case-item-title {
+    font-size: 12.5px; font-weight: 500;
+    color: var(--cream); line-height: 1.35;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding-right: 20px;
+  }
+  .case-item-meta {
+    display: flex; align-items: center; gap: 6px; margin-top: 5px;
+  }
+  .case-date { font-size: 10.5px; color: var(--cream-muted); }
+  .case-phase-badge {
+    font-size: 9.5px; font-weight: 600; letter-spacing: 0.4px;
+    padding: 2px 6px; border-radius: 10px;
+    background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border);
+  }
+  .case-phase-badge.done { background: rgba(76,175,130,0.15); color: var(--green); border-color: rgba(76,175,130,0.3); }
+
+  .case-delete-btn {
+    position: absolute; top: 8px; right: 8px;
+    width: 18px; height: 18px;
+    background: transparent; border: none;
+    color: var(--cream-muted); font-size: 12px;
+    cursor: pointer; border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.15s;
+  }
+  .case-item:hover .case-delete-btn { opacity: 1; }
+  .case-delete-btn:hover { color: var(--red); }
+
+  .sidebar-empty {
+    padding: 20px 16px; text-align: center;
+    font-size: 12px; color: var(--cream-muted); line-height: 1.6;
+  }
+
+  /* ── MAIN ── */
+  .main { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── CHAT PANEL ── */
+  .chat-panel {
+    flex: 1; display: flex; flex-direction: column;
+    border-right: 1px solid var(--border); min-width: 0;
+  }
+
+  .chat-phase-bar {
+    display: flex; padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0; overflow-x: auto;
+  }
+  .phase-step {
+    padding: 11px 0; margin-right: 22px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--cream-muted); border-bottom: 2px solid transparent;
+    transition: all 0.3s; white-space: nowrap;
+  }
+  .phase-step.active { color: var(--gold); border-bottom-color: var(--gold); }
+  .phase-step.done   { color: var(--green); }
+
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 24px;
+    display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--card-mid); border-radius: 2px; }
+
+  .msg { display: flex; gap: 12px; max-width: 88%; animation: fadeUp 0.3s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
+  }
+  .msg.ai   .msg-avatar { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .msg.user .msg-avatar { background: var(--card-mid); color: var(--cream-dim); }
+
+  .msg-bubble { padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.7; }
+  .msg.ai   .msg-bubble { background: var(--card); border: 1px solid var(--border); border-top-left-radius: 4px; color: var(--cream); }
+  .msg.user .msg-bubble { background: var(--card-mid); border-top-right-radius: 4px; color: var(--cream); }
+  .msg-bubble strong { color: var(--gold); font-weight: 600; }
+  .msg-bubble em { color: var(--cream-muted); font-style: normal; font-size: 13px; }
+
+  .typing-indicator { display: flex; gap: 5px; padding: 6px 0; align-items: center; }
+  .typing-dot { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0);opacity:0.4} 30%{transform:translateY(-5px);opacity:1} }
+
+  .chat-input-area { padding: 14px 24px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
+
+  .chat-textarea {
+    flex: 1; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    color: var(--cream); font-family: 'Be Vietnam Pro',sans-serif;
+    font-size: 14px; resize: none; min-height: 48px; max-height: 120px;
+    line-height: 1.5; transition: border-color 0.2s;
+  }
+  .chat-textarea:focus { outline: none; border-color: var(--red); }
+  .chat-textarea::placeholder { color: var(--cream-muted); }
+
+  .send-btn {
+    width: 44px; height: 44px; background: var(--red); border: none;
+    border-radius: 10px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .send-btn:hover { background: #A93226; transform: scale(1.04); }
+  .send-btn:disabled { background: var(--card-mid); cursor: not-allowed; transform: none; }
+  .send-icon { width: 18px; height: 18px; fill: #fff; }
+
+  .starters { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .starter-chip {
+    padding: 7px 12px; background: transparent;
+    border: 1px solid var(--border-warm); border-radius: 20px;
+    color: var(--cream-dim); font-size: 12px; cursor: pointer;
+    transition: all 0.2s; font-family: 'Be Vietnam Pro',sans-serif;
+  }
+  .starter-chip:hover { border-color: var(--red); color: var(--cream); background: var(--red-dim); }
+
+  /* ── DIAG PANEL ── */
+  .diag-panel {
+    width: 300px; flex-shrink: 0; display: flex; flex-direction: column;
+    overflow-y: auto; padding: 18px 16px; gap: 14px;
+    background: rgba(20,15,9,0.5);
+  }
+  .diag-panel::-webkit-scrollbar { width: 4px; }
+  .diag-panel::-webkit-scrollbar-thumb { background: var(--card-mid); border-radius: 2px; }
+
+  .diag-section-title {
+    font-size: 9.5px; font-weight: 600; letter-spacing: 1.3px;
+    color: var(--cream-muted); text-transform: uppercase; margin-bottom: 6px;
+  }
+  .diag-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+
+  .phase-tracker { display: flex; flex-direction: column; gap: 9px; }
+  .pt-row { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--cream-muted); transition: color 0.3s; }
+  .pt-row.done   { color: var(--green); }
+  .pt-row.active { color: var(--cream); }
+  .pt-icon {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; background: var(--card-mid); flex-shrink: 0; transition: all 0.3s;
+  }
+  .pt-row.done   .pt-icon { background: var(--green); color: #fff; }
+  .pt-row.active .pt-icon { background: var(--red); color: #fff; }
+
+  .cause-row { margin-bottom: 10px; }
+  .cause-label-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+  .cause-label { font-size: 12px; color: var(--cream-dim); }
+  .cause-pct   { font-size: 11px; font-weight: 600; color: var(--gold); }
+  .cause-bar-track { height: 5px; background: rgba(240,234,214,0.07); border-radius: 3px; overflow: hidden; }
+  .cause-bar-fill  { height: 100%; border-radius: 3px; width: 0%; transition: width 1s cubic-bezier(0.4,0,0.2,1); background: var(--gold); }
+  .cause-bar-fill.low  { background: var(--card-mid); }
+  .cause-bar-fill.mid  { background: #8B6520; }
+  .cause-bar-fill.high { background: var(--red); }
+
+  .evidence-list { display: flex; flex-direction: column; gap: 7px; }
+  .evidence-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--cream-dim); line-height: 1.5; }
+  .evidence-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .evidence-dot.strong   { background: var(--green); }
+  .evidence-dot.moderate { background: var(--gold); }
+  .evidence-dot.weak     { background: var(--cream-muted); }
+  .evidence-dot.none     { background: var(--card-mid); border: 1px solid var(--cream-muted); }
+
+  .pending-label { font-size: 12px; color: var(--cream-muted); font-style: italic; }
+
+  .memo-btn {
+    width: 100%; padding: 12px; background: var(--red);
+    border: none; border-radius: 8px; font-family: 'Be Vietnam Pro',sans-serif;
+    font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; transition: all 0.2s;
+  }
+  .memo-btn:hover { background: #A93226; }
+  .memo-btn:disabled { background: var(--card-mid); color: var(--cream-muted); cursor: not-allowed; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 40px 28px; gap: 12px;
+  }
+  .empty-icon {
+    width: 60px; height: 60px; background: var(--red-dim);
+    border: 1px solid var(--red-border); border-radius: 18px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 6px;
+  }
+  .empty-title { font-family: 'DM Serif Display',serif; font-size: 24px; color: var(--cream); line-height: 1.25; }
+  .empty-sub   { font-size: 13.5px; color: var(--cream-muted); max-width: 340px; line-height: 1.65; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--card-mid); border: 1px solid var(--border-warm);
+    color: var(--cream); padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; opacity: 0; pointer-events: none;
+    transition: all 0.25s; z-index: 200; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(20,15,9,0.88);
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    width: 100%; max-width: 640px; max-height: 80vh;
+    display: flex; flex-direction: column; animation: modalIn 0.25s ease;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.97)} to{opacity:1;transform:scale(1)} }
+  .modal-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-title  { font-family: 'DM Serif Display',serif; font-size: 18px; color: var(--cream); }
+  .modal-close  { width: 30px; height: 30px; background: var(--card-mid); border: none; border-radius: 6px; color: var(--cream-dim); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .modal-body   { padding: 20px 24px; overflow-y: auto; flex: 1; line-height: 1.7; font-size: 13.5px; }
+  .modal-body::-webkit-scrollbar { width: 4px; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--card-mid); }
+  .memo-section { margin-bottom: 18px; }
+  .memo-section-title { font-size: 10px; font-weight: 600; letter-spacing: 1.2px; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+  .memo-section p  { color: var(--cream-dim); }
+  .memo-section ul { padding-left: 16px; color: var(--cream-dim); }
+  .memo-section li { margin-bottom: 4px; }
+  .modal-footer { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+  .modal-footer button { padding: 9px 18px; border-radius: 7px; font-size: 13px; font-family: 'Be Vietnam Pro',sans-serif; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+  .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--cream-dim); }
+  .btn-secondary:hover { border-color: var(--cream-muted); }
+  .btn-primary   { background: var(--red); border: none; color: #fff; font-weight: 600; }
+  .btn-primary:hover { background: #A93226; }
+
+  @media (max-width: 768px) { .diag-panel { display: none; } .cases-sidebar.open { width: 220px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <button class="cases-toggle-btn" id="cases-toggle-btn" onclick="toggleSidebar()" title="Lịch sử ca">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+      </svg>
+    </button>
+    <div class="logo">
+      <div class="logo-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+          <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-title" id="logo-title">Hệ Thống Quyết Định Lương</div>
+        <div class="logo-sub"  id="logo-sub">Rewards Decision OS</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="save-btn" id="save-btn" onclick="saveCurrentCase()">
+      💾 <span id="save-btn-label">Lưu ca này</span>
+    </button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('vi')" id="btn-vi">VI</button>
+      <button class="lang-btn"        onclick="setLang('en')" id="btn-en">EN</button>
+    </div>
+    <button class="new-case-btn" onclick="resetConversation()" id="new-case-btn">+ Ca mới</button>
+  </div>
+</header>
+
+<div class="body-wrap">
+
+  <!-- CASES SIDEBAR -->
+  <div class="cases-sidebar" id="cases-sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title" id="sidebar-title">Lịch sử ca</div>
+    </div>
+    <div class="cases-list" id="cases-list">
+      <div class="sidebar-empty" id="sidebar-empty">Chưa có ca nào được lưu.</div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div class="main">
+    <!-- CHAT -->
+    <div class="chat-panel">
+      <div class="chat-phase-bar">
+        <div class="phase-step active" id="phase-0">1. Vấn đề</div>
+        <div class="phase-step"        id="phase-1">2. Chẩn đoán</div>
+        <div class="phase-step"        id="phase-2">3. Bằng chứng</div>
+        <div class="phase-step"        id="phase-3">4. Khuyến nghị</div>
+        <div class="phase-step"        id="phase-4">5. Bản ghi nhớ</div>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#C0392B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="empty-title" id="empty-title">Trước khi thay đổi lương</div>
+          <div class="empty-sub"   id="empty-sub">Hãy cho tôi biết vấn đề nhân sự bạn đang gặp. Tôi sẽ giúp chẩn đoán đây có thực sự là vấn đề về lương thưởng hay không — trước khi bạn chi tiền cho giải pháp sai.</div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-row">
+          <textarea class="chat-textarea" id="chat-input" rows="1"
+            placeholder="Mô tả vấn đề nhân sự của bạn..."
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg class="send-icon" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+        <div class="starters" id="starters">
+          <button class="starter-chip" onclick="useStarter(this)">Nhân viên kinh doanh đang nghỉ việc</button>
+          <button class="starter-chip" onclick="useStarter(this)">Nhân viên phàn nàn lương không công bằng</button>
+          <button class="starter-chip" onclick="useStarter(this)">Thưởng không tạo động lực</button>
+          <button class="starter-chip" onclick="useStarter(this)">Có nên tăng lương năm nay không?</button>
+          <button class="starter-chip" onclick="useStarter(this)">Trả lương cao nhưng hiệu suất vẫn thấp</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIAG PANEL -->
+    <div class="diag-panel">
+      <div>
+        <div class="diag-section-title" id="diag-title-phases">Tiến độ</div>
+        <div class="diag-card">
+          <div class="phase-tracker">
+            <div class="pt-row active" id="pt-0"><div class="pt-icon">1</div><span id="pt-label-0">Xác định vấn đề</span></div>
+            <div class="pt-row"        id="pt-1"><div class="pt-icon">2</div><span id="pt-label-1">Kiểm tra nguyên nhân</span></div>
+            <div class="pt-row"        id="pt-2"><div class="pt-icon">3</div><span id="pt-label-2">Đánh giá bằng chứng</span></div>
+            <div class="pt-row"        id="pt-3"><div class="pt-icon">4</div><span id="pt-label-3">Đề xuất quyết định</span></div>
+            <div class="pt-row"        id="pt-4"><div class="pt-icon">5</div><span id="pt-label-4">Tạo bản ghi nhớ</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="diag-section-title" id="diag-title-causes">Ước tính nguyên nhân</div>
+        <div class="diag-card">
+          <div id="causes-pending" class="pending-label">Đang chờ chẩn đoán...</div>
+          <div id="causes-bars" style="display:none">
+            <div class="cause-row"><div class="cause-label-row"><span class="cause-label" id="cl-1">Lương thị trường</span><span class="cause-pct" id="cp-1">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-1"></div></div></div>
+            <div class="cause-row"><div class="cause-label-row"><span class="cause-label" id="cl-2">Công bằng nội bộ</span><span class="cause-pct" id="cp-2">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-2"></div></div></div>
+            <div class="cause-row"><div class="cause-label-row"><span class="cause-label" id="cl-3">Chất lượng quản lý</span><span class="cause-pct" id="cp-3">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-3"></div></div></div>
+            <div class="cause-row"><div class="cause-label-row"><span class="cause-label" id="cl-4">Quản lý hiệu suất</span><span class="cause-pct" id="cp-4">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-4"></div></div></div>
+            <div class="cause-row"><div class="cause-label-row"><span class="cause-label" id="cl-5">Phát triển nghề nghiệp</span><span class="cause-pct" id="cp-5">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-5"></div></div></div>
+            <div class="cause-row" style="margin-bottom:0"><div class="cause-label-row"><span class="cause-label" id="cl-6">Khối lượng / Tổ chức</span><span class="cause-pct" id="cp-6">0%</span></div><div class="cause-bar-track"><div class="cause-bar-fill" id="cb-6"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="diag-section-title" id="diag-title-evidence">Bằng chứng đã tìm</div>
+        <div class="diag-card">
+          <div class="evidence-list" id="evidence-list">
+            <div class="pending-label" id="evidence-pending">Chưa có bằng chứng nào.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="memo-btn" id="memo-btn" onclick="showMemo()" disabled>
+        📄 <span id="memo-btn-label">Tạo Bản Ghi Nhớ Quyết Định</span>
+      </button>
+
+      <button class="memo-btn" id="export-btn" onclick="exportConversation()" style="background:var(--card-mid);color:var(--cream-dim);margin-top:8px;display:none">
+        📋 <span id="export-btn-label">Sao chép case để gửi feedback</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMO MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeMemoOnBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Bản Ghi Nhớ Quyết Định CEO</div>
+      <button class="modal-close" onclick="closeMemo()">✕</button>
+    </div>
+    <div class="modal-body" id="memo-content"></div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeMemo()" id="modal-btn-close">Đóng</button>
+      <button class="btn-primary"   onclick="copyMemo()"  id="modal-btn-copy">Sao chép bản ghi</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ─────────────────────────────────────────────────────
+let lang = 'vi';
+let messages = [];
+let currentPhase = 0;
+let diagnosisData = { causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0}, evidence:[], memoContent:null, problemStatement:'' };
+let isTyping = false;
+let memoReady = false;
+let currentCaseId = null;  // null = unsaved new case
+let sidebarOpen = false;
+
+// ─── TRANSLATIONS ──────────────────────────────────────────────
+const T = {
+  vi: {
+    logoTitle:'Hệ Thống Quyết Định Lương', logoSub:'Rewards Decision OS',
+    newCase:'+ Ca mới', saveBtnLabel:'Lưu ca này', sidebarTitle:'Lịch sử ca',
+    sidebarEmpty:'Chưa có ca nào được lưu.',
+    phases:['1. Vấn đề','2. Chẩn đoán','3. Bằng chứng','4. Khuyến nghị','5. Bản ghi nhớ'],
+    ptLabels:['Xác định vấn đề','Kiểm tra nguyên nhân','Đánh giá bằng chứng','Đề xuất quyết định','Tạo bản ghi nhớ'],
+    diagTitlePhases:'Tiến độ', diagTitleCauses:'Ước tính nguyên nhân', diagTitleEvidence:'Bằng chứng đã tìm',
+    causesPending:'Đang chờ chẩn đoán...', evidencePending:'Chưa có bằng chứng nào.',
+    causeLabels:['Lương thị trường','Công bằng nội bộ','Chất lượng quản lý','Quản lý hiệu suất','Phát triển nghề nghiệp','Khối lượng / Tổ chức'],
+    emptyTitle:'Trước khi thay đổi lương',
+    emptySub:'Hãy cho tôi biết vấn đề nhân sự bạn đang gặp. Tôi sẽ giúp chẩn đoán đây có thực sự là vấn đề về lương thưởng hay không — trước khi bạn chi tiền cho giải pháp sai.',
+    placeholder:'Mô tả vấn đề nhân sự của bạn...',
+    memoBtnLabel:'Tạo Bản Ghi Nhớ Quyết Định',
+    modalTitle:'Bản Ghi Nhớ Quyết Định CEO', modalClose:'Đóng', modalCopy:'Sao chép bản ghi',
+    starters:['Nhân viên kinh doanh đang nghỉ việc','Nhân viên phàn nàn lương không công bằng','Thưởng không tạo động lực','Có nên tăng lương năm nay không?','Trả lương cao nhưng hiệu suất vẫn thấp'],
+    copied:'✓ Đã sao chép!', toastSaved:'✓ Đã lưu ca', toastDeleted:'Đã xóa ca',
+    phaseNames:['Vấn đề','Chẩn đoán','Bằng chứng','Khuyến nghị','Hoàn thành']
+  },
+  en: {
+    logoTitle:'Rewards Decision OS', logoSub:'Should we change pay?',
+    newCase:'+ New Case', saveBtnLabel:'Save case', sidebarTitle:'Case history',
+    sidebarEmpty:'No saved cases yet.',
+    phases:['1. Problem','2. Diagnosis','3. Evidence','4. Recommendation','5. Memo'],
+    ptLabels:['Define the problem','Root cause check','Score evidence','Decision recommendation','Generate memo'],
+    diagTitlePhases:'Progress', diagTitleCauses:'Root Cause Estimate', diagTitleEvidence:'Evidence Found',
+    causesPending:'Waiting for diagnosis...', evidencePending:'No evidence collected yet.',
+    causeLabels:['Market Pay','Internal Equity','Manager Quality','Performance Mgmt','Career Growth','Workload / Design'],
+    emptyTitle:'Before you change pay',
+    emptySub:"Tell me the people problem you're facing. I'll help you diagnose whether it's really a compensation issue — before you spend money on the wrong solution.",
+    placeholder:'Describe your people problem...',
+    memoBtnLabel:'Generate Decision Memo',
+    modalTitle:'CEO Decision Memo', modalClose:'Close', modalCopy:'Copy Memo',
+    starters:['My salespeople are leaving','Pay feels unfair to employees',"Bonus doesn't motivate",'Should we increase salary this year?','We pay high but performance is low'],
+    copied:'✓ Copied!', toastSaved:'✓ Case saved', toastDeleted:'Case deleted',
+    phaseNames:['Problem','Diagnosis','Evidence','Recommendation','Complete']
+  }
+};
+
+// ─── LANG ──────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-vi').classList.toggle('active', l==='vi');
+  document.getElementById('btn-en').classList.toggle('active', l==='en');
+  applyTranslations();
+}
+
+function applyTranslations() {
+  const t = T[lang];
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.textContent=val; };
+  set('logo-title',t.logoTitle); set('logo-sub',t.logoSub); set('new-case-btn',t.newCase);
+  set('save-btn-label',t.saveBtnLabel); set('sidebar-title',t.sidebarTitle);
+  set('sidebar-empty',t.sidebarEmpty);
+  set('empty-title',t.emptyTitle); set('empty-sub',t.emptySub);
+  set('memo-btn-label',t.memoBtnLabel); set('modal-title',t.modalTitle);
+  set('modal-btn-close',t.modalClose); set('modal-btn-copy',t.modalCopy);
+  set('diag-title-phases',t.diagTitlePhases); set('diag-title-causes',t.diagTitleCauses);
+  set('diag-title-evidence',t.diagTitleEvidence);
+  set('causes-pending',t.causesPending); set('evidence-pending',t.evidencePending);
+  const inp=document.getElementById('chat-input'); if(inp) inp.placeholder=t.placeholder;
+  t.phases.forEach((p,i)=>set(`phase-${i}`,p));
+  t.ptLabels.forEach((p,i)=>set(`pt-label-${i}`,p));
+  t.causeLabels.forEach((c,i)=>set(`cl-${i+1}`,c));
+  document.querySelectorAll('.starter-chip').forEach((chip,i)=>{ if(t.starters[i]) chip.textContent=t.starters[i]; });
+}
+
+// ─── SIDEBAR ───────────────────────────────────────────────────
+function toggleSidebar() {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('cases-sidebar').classList.toggle('open', sidebarOpen);
+  document.getElementById('cases-toggle-btn').classList.toggle('active', sidebarOpen);
+  if (sidebarOpen) renderCasesList();
+}
+
+// ─── STORAGE (localStorage — works in standalone web deployment) ────
+const STORAGE_PREFIX = 'rewards_os_case:';
+
+async function getAllCases() {
+  try {
+    const cases = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        try {
+          const value = localStorage.getItem(key);
+          if (value) cases.push(JSON.parse(value));
+        } catch(e) {}
+      }
+    }
+    return cases.sort((a,b) => b.updatedAt - a.updatedAt);
+  } catch(e) { return []; }
+}
+
+async function saveCase(caseData) {
+  try {
+    localStorage.setItem(STORAGE_PREFIX + caseData.id, JSON.stringify(caseData));
+    return true;
+  } catch(e) { return false; }
+}
+
+async function deleteCase(id) {
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + id);
+    return true;
+  } catch(e) { return false; }
+}
+
+function exportConversation() {
+  if (messages.length === 0) return;
+
+  const lines = [];
+  lines.push('=== CASE STUDY — Rewards Decision OS ===');
+  lines.push('Thời gian: ' + new Date().toLocaleString('vi-VN'));
+  lines.push('');
+
+  messages.forEach(m => {
+    if (m.role === 'user') {
+      lines.push('[CEO/HR]: ' + m.content);
+    } else {
+      const cleanMsg = m.content.replace(/<JSON>[\s\S]*?<\/JSON>/g, '').trim();
+      if (cleanMsg) lines.push('[AI]: ' + cleanMsg);
+    }
+    lines.push('');
+  });
+
+  lines.push('--- Phản hồi của bạn ---');
+  lines.push('1. AI chẩn đoán đúng chưa? Có gì sai hoặc thiếu?');
+  lines.push('2. Bạn sẽ hỏi khác đi ở đâu nếu là người thật?');
+  lines.push('3. Case này có thực tế không, hay khác với điều bạn từng gặp?');
+  lines.push('');
+
+  const text = lines.join('\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast(lang==='vi' ? '✓ Đã sao chép — gửi cho admin qua Zalo/email nhé' : '✓ Copied — send to admin via your preferred channel');
+  }).catch(() => {
+    // Fallback: show in a prompt for manual copy if clipboard API fails
+    alert(text);
+  });
+}
+
+async function saveCurrentCase() {
+  if (messages.length === 0) return;
+
+  // Extract a title from the first user message
+  const firstUser = messages.find(m => m.role === 'user');
+  const title = firstUser ? firstUser.content.slice(0, 60) : 'Ca chưa đặt tên';
+
+  const id = currentCaseId || ('case_' + Date.now());
+  currentCaseId = id;
+
+  const caseData = {
+    id,
+    title,
+    lang,
+    phase: currentPhase,
+    memoReady,
+    messages: messages.map(m => ({ role: m.role, content: m.content })),
+    diagnosisData: {
+      causes: { ...diagnosisData.causes },
+      evidence: [...diagnosisData.evidence],
+      memoContent: diagnosisData.memoContent,
+      problemStatement: diagnosisData.problemStatement
+    },
+    updatedAt: Date.now()
+  };
+
+  const ok = await saveCase(caseData);
+  if (ok) {
+    showToast(T[lang].toastSaved + ' — ' + title.slice(0,30) + (title.length > 30 ? '…' : ''));
+    if (sidebarOpen) renderCasesList();
+  }
+}
+
+async function loadCase(id) {
+  try {
+    const value = localStorage.getItem(STORAGE_PREFIX + id);
+    if (!value) return;
+    const c = JSON.parse(value);
+
+    // Reset UI
+    resetUIOnly();
+
+    // Restore state
+    currentCaseId = c.id;
+    lang = c.lang || 'vi';
+    currentPhase = c.phase || 0;
+    memoReady = c.memoReady || false;
+    messages = c.messages || [];
+    diagnosisData = c.diagnosisData || { causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0}, evidence:[], memoContent:null, problemStatement:'' };
+
+    applyTranslations();
+    setPhase(currentPhase);
+
+    // Restore causes
+    if (diagnosisData.causes && Object.values(diagnosisData.causes).some(v=>v>0)) {
+      updateCauses(diagnosisData.causes);
+    }
+
+    // Restore evidence
+    if (diagnosisData.evidence && diagnosisData.evidence.length > 0) {
+      document.getElementById('evidence-pending').style.display = 'none';
+      diagnosisData.evidence.forEach(e => addEvidence(e.text, e.strength, true));
+    }
+
+    // Restore memo button
+    if (memoReady) document.getElementById('memo-btn').disabled = false;
+
+    // Rebuild chat UI (render only last 40 messages for perf)
+    const container = document.getElementById('chat-messages');
+    const emptyState = document.getElementById('empty-state');
+    if (emptyState) emptyState.style.display = 'none';
+    document.getElementById('starters').style.display = 'none';
+
+    const visible = messages.slice(-40);
+    visible.forEach(m => {
+      // raw content — strip JSON block before display
+      const display = m.content.replace(/<JSON>[\s\S]*?<\/JSON>/g,'').trim();
+      if (display) addMessage(m.role, display, true);
+    });
+
+    // Show save btn
+    document.getElementById('save-btn').classList.add('visible');
+
+    // Highlight active in sidebar
+    document.querySelectorAll('.case-item').forEach(el => el.classList.remove('active'));
+    const activeEl = document.querySelector(`.case-item[data-id="${id}"]`);
+    if (activeEl) activeEl.classList.add('active');
+
+  } catch(e) { console.error('loadCase error', e); }
+}
+
+async function deleteCaseUI(id, e) {
+  e.stopPropagation();
+  const ok = await deleteCase(id);
+  if (ok) {
+    showToast(T[lang].toastDeleted);
+    if (currentCaseId === id) resetConversation();
+    renderCasesList();
+  }
+}
+
+async function renderCasesList() {
+  const cases = await getAllCases();
+  const list = document.getElementById('cases-list');
+  const empty = document.getElementById('sidebar-empty');
+
+  if (cases.length === 0) {
+    list.innerHTML = `<div class="sidebar-empty" id="sidebar-empty">${T[lang].sidebarEmpty}</div>`;
+    return;
+  }
+
+  list.innerHTML = '';
+  cases.forEach(c => {
+    const date = new Date(c.updatedAt);
+    const dateStr = date.toLocaleDateString(lang==='vi'?'vi-VN':'en-US', {day:'numeric',month:'short'});
+    const phaseName = T[lang].phaseNames[Math.min(c.phase, 4)] || '';
+    const isDone = c.memoReady;
+
+    const item = document.createElement('div');
+    item.className = 'case-item' + (c.id === currentCaseId ? ' active' : '');
+    item.dataset.id = c.id;
+    item.onclick = () => loadCase(c.id);
+    item.innerHTML = `
+      <div class="case-item-title">${escHtml(c.title)}</div>
+      <div class="case-item-meta">
+        <span class="case-date">${dateStr}</span>
+        <span class="case-phase-badge ${isDone?'done':''}">${phaseName}</span>
+      </div>
+      <button class="case-delete-btn" onclick="deleteCaseUI('${c.id}', event)" title="Xóa">✕</button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── TOAST ─────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── PHASE ─────────────────────────────────────────────────────
+function setPhase(n) {
+  currentPhase = n;
+  for (let i = 0; i < 5; i++) {
+    const tab = document.getElementById(`phase-${i}`);
+    const pt  = document.getElementById(`pt-${i}`);
+    if (!tab||!pt) continue;
+    tab.className = 'phase-step'+(i<n?' done':i===n?' active':'');
+    pt.className  = 'pt-row'+(i<n?' done':i===n?' active':'');
+    pt.querySelector('.pt-icon').textContent = i<n?'✓':(i+1);
+  }
+}
+
+// ─── CAUSES ────────────────────────────────────────────────────
+function updateCauses(data) {
+  document.getElementById('causes-pending').style.display='none';
+  document.getElementById('causes-bars').style.display='block';
+  ['market','equity','manager','performance','career','workload'].forEach((k,i)=>{
+    const pct=data[k]||0;
+    const fill=document.getElementById(`cb-${i+1}`);
+    const lbl=document.getElementById(`cp-${i+1}`);
+    fill.style.width=pct+'%';
+    fill.className='cause-bar-fill '+(pct>=30?'high':pct>=15?'mid':'low');
+    lbl.textContent=pct+'%';
+  });
+  diagnosisData.causes=data;
+}
+
+// ─── EVIDENCE ──────────────────────────────────────────────────
+function addEvidence(text, strength, skipPush) {
+  const list=document.getElementById('evidence-list');
+  const pending=document.getElementById('evidence-pending');
+  if(pending) pending.style.display='none';
+  const item=document.createElement('div');
+  item.className='evidence-item';
+  item.innerHTML=`<div class="evidence-dot ${strength}"></div><span>${escHtml(text)}</span>`;
+  list.appendChild(item);
+  if(!skipPush) diagnosisData.evidence.push({text,strength});
+}
+
+function clearEvidence() {
+  document.getElementById('evidence-list').innerHTML=`<div class="pending-label" id="evidence-pending">${T[lang].evidencePending}</div>`;
+  diagnosisData.evidence=[];
+}
+
+// ─── CHAT ──────────────────────────────────────────────────────
+function addMessage(role, content, skipPush) {
+  const container=document.getElementById('chat-messages');
+  const emptyState=document.getElementById('empty-state');
+  if(emptyState) emptyState.style.display='none';
+  const startersEl=document.getElementById('starters');
+  if(startersEl&&role==='user') startersEl.style.display='none';
+
+  const msg=document.createElement('div');
+  msg.className=`msg ${role==='user'?'user':'ai'}`;
+  const avatar=document.createElement('div');
+  avatar.className='msg-avatar'; avatar.textContent=role==='user'?'U':'AI';
+  const bubble=document.createElement('div');
+  bubble.className='msg-bubble'; bubble.innerHTML=formatMsg(content);
+  msg.appendChild(avatar); msg.appendChild(bubble);
+  container.appendChild(msg);
+  container.scrollTop=container.scrollHeight;
+
+  // Show save button after first exchange
+  if(messages.length>=1 || role==='user') {
+    document.getElementById('save-btn').classList.add('visible');
+    const exportBtn = document.getElementById('export-btn');
+    if (exportBtn) exportBtn.style.display = 'block';
+  }
+}
+
+function formatMsg(text) {
+  return text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n/g,'<br>');
+}
+
+function showTyping() {
+  const c=document.getElementById('chat-messages');
+  const el=document.createElement('div');
+  el.className='msg ai'; el.id='typing-indicator';
+  el.innerHTML=`<div class="msg-avatar">AI</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  c.appendChild(el); c.scrollTop=c.scrollHeight;
+}
+function removeTyping(){const el=document.getElementById('typing-indicator');if(el)el.remove();}
+
+// ─── SEND ──────────────────────────────────────────────────────
+async function sendMessage() {
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text||isTyping) return;
+  input.value=''; autoResize(input);
+  addMessage('user',text);
+  messages.push({role:'user',content:text});
+  isTyping=true; document.getElementById('send-btn').disabled=true; showTyping();
+
+  try {
+    const resp=await fetch('/api/chat',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:1000,system:buildSystemPrompt(),messages})
+    });
+
+    if (resp.status === 429) {
+      removeTyping();
+      addMessage('ai', lang==='vi'
+        ? 'Bạn đang gửi quá nhiều yêu cầu. Vui lòng chờ một phút rồi thử lại.'
+        : 'Too many requests. Please wait a minute and try again.');
+      isTyping=false; document.getElementById('send-btn').disabled=false;
+      return;
+    }
+
+    if (!resp.ok) {
+      throw new Error('API request failed: ' + resp.status);
+    }
+
+    const data=await resp.json();
+    const raw=data.content.map(b=>b.text||'').join('');
+    const parsed=parseAIResponse(raw);
+
+    removeTyping();
+    addMessage('ai', parsed.message);
+    messages.push({role:'assistant',content:raw});
+
+    if(parsed.phase!==undefined) setPhase(parsed.phase);
+    if(parsed.causes) updateCauses(parsed.causes);
+    if(parsed.evidence) parsed.evidence.forEach(e=>addEvidence(e.text,e.strength));
+    if(parsed.memoReady){
+      memoReady=true;
+      document.getElementById('memo-btn').disabled=false;
+      diagnosisData.memoContent=parsed.memo;
+      setPhase(4);
+    }
+  } catch(err) {
+    removeTyping();
+    addMessage('ai', lang==='vi'?'Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại.':'Sorry, an error occurred. Please try again.');
+    console.error(err);
+  }
+
+  isTyping=false; document.getElementById('send-btn').disabled=false;
+}
+
+// ─── SYSTEM PROMPT (Proprietary Knowledge Layer v2) ─────────────
+const PROPRIETARY_KNOWLEDGE = `
+# Built from expert knowledge: Vietnam Rewards Consulting, 500–2,000 employee companies
+# All industries: Technology, Fintech, Manufacturing, Consumer, Retail, Professional Services
+
+---
+
+## IDENTITY
+
+You are a senior Rewards Decision Advisor with deep expertise in Vietnamese mid-sized companies (500–2,000 employees). You have advised across technology, fintech, manufacturing, consumer, retail, and professional services sectors in Vietnam.
+
+Your job is NOT to give compensation solutions. Your job is to slow the decision down, diagnose the real root cause, and protect the CEO or HR leader from making an expensive mistake based on incomplete evidence.
+
+You bring 20+ years of Vietnam-specific Rewards experience that generic AI cannot replicate. You think like a trusted advisor who has seen these patterns dozens of times — not like a consultant selling a framework.
+
+---
+
+## FOUNDING PHILOSOPHY
+### (The lens through which every pay decision is evaluated)
+
+> "Do not pay so high that a person loses their enthusiasm for work but cannot dare to leave. Do not pay so low that no one even wants to work."
+
+This is the core principle behind every recommendation you make. Pay is not a lever to maximize or minimize — it is a calibration problem. The goal is the range where people are energized, fairly treated, and free to choose to stay because the work is meaningful — not trapped by a number.
+
+**Overpaying creates two failures, not one:**
+- The obvious failure: cost bloat, unsustainable comp structures.
+- The invisible failure: the "golden prisoner" — someone paid far above market who has stopped growing, stopped trying, and cannot leave. They stay in body but leave in spirit. This is the more dangerous failure because it is invisible on a headcount report and corrosive to team culture.
+
+**Underpaying creates one clear failure:**
+- You never get to see what the person could have become, because they left before they had the chance to show you.
+
+**The right pay range is where:**
+- The person feels fairly treated relative to peers inside and market outside
+- They have enough security to take creative risks and speak up
+- They would choose to stay even if offered marginally more elsewhere — because the work, growth, and environment hold them
+- Leaving would be a real decision, not an easy escape from a trap
+
+**Apply this philosophy in every diagnosis:**
+- When a CEO wants to increase pay significantly: ask whether they risk creating golden prisoners, not just whether they can afford it.
+- When a CEO resists increasing pay: ask whether they are paying below the threshold where good people feel respected enough to stay and contribute fully.
+- When someone seems disengaged despite high pay: consider the golden prisoner pattern — the problem may not be solvable with more money or less money. It may require a role change, new challenge, or an honest conversation about fit.
+- When diagnosing retention: always separate "cannot afford to leave" from "chooses to stay." The first is a risk. The second is the goal.
+
+---
+
+## LANGUAGE
+
+Respond in the language the user writes in. If Vietnamese, respond fully in Vietnamese. If English, respond in English. Match their register — direct and practical, not academic.
+
+---
+
+## CORE BELIEF SYSTEM
+### (Encode these as priors in every diagnosis)
+
+1. **Manager quality is the most underdiagnosed root cause.** Most CEOs instinctively blame pay. In your experience across Vietnam, manager quality explains a significant share of turnover and performance problems that get misdiagnosed as compensation issues. Always probe for this before accepting the pay narrative.
+
+2. **Bonus plans fail because KPIs are unclear — not because the money is wrong.** When a CEO says "the bonus doesn't motivate people," the first question is never "how much is the bonus?" It's "do people understand what they need to do to earn it, and do they believe they can actually achieve it?"
+
+3. **Grade structure problems are almost always org design problems in disguise.** When a company wants to redesign its salary structure, check first: is this really about pay, or is it about unclear roles, overlapping responsibilities, or managers who were promoted without capability assessment?
+
+4. **Complainers and high performers rarely want the same thing.** When there are pay fairness complaints, separate the voices immediately. Complainers often want recognition and process fairness. High performers want differentiation and growth. Solving for one group with a blanket solution typically makes the other group worse off.
+
+5. **In Vietnamese companies, face and respect are often more important than pay.** Employees in Vietnam rarely quit for pay alone. Before concluding that someone is leaving for money, check: were they passed over for promotion? Were they embarrassed in front of their team? Was their opinion ignored in a decision? These are often more powerful drivers than a 10–15% pay gap.
+
+6. **Overpaying is a problem, not just underpaying.** The "golden prisoner" is a real pattern: someone paid significantly above market who has lost motivation, stopped growing, and cannot afford to leave. They become a drag on team culture and a blocker for talent below them. When diagnosing low performance despite high pay, always check for this pattern first. The solution is rarely more money — it is usually a role redesign, honest feedback, or a structured transition.
+
+---
+
+## HIGH-RISK SITUATION FLAGS
+### (Raise these immediately when detected in the conversation)
+
+Immediately flag and probe deeper when you detect any of these situations:
+
+- **Founder still setting individual salaries manually** → Classic sign of no pay governance. Any pay solution will fail without a structure. Do not recommend market benchmarking or bonus redesign until this is addressed.
+
+- **Company doubled headcount in under 2 years** → Almost guaranteed pay compression between old and new hires. Internal equity check is mandatory before any other diagnosis.
+
+- **HR has no people analytics** → You are working with incomplete data. Any root cause diagnosis is provisional. Say so clearly and tell the user what data they need to collect before making a decision.
+
+- **Someone is paid significantly above market but performance is declining** → Golden prisoner pattern. Do not recommend another pay increase. Probe for role fit, motivation, and whether the person feels challenged. The solution here is almost never financial.
+
+---
+
+## WRONG SOLUTIONS WATCH LIST
+### (Pattern-match against these and warn proactively)
+
+When the user describes a problem that sounds like it points toward one of these, flag it before they go further:
+
+| Wrong solution | What it signals | What to check instead |
+|---|---|---|
+| Across-the-board salary increase | CEO under pressure, wants to do something visible | Check if the issue is concentrated in specific roles, levels, or managers — a blanket increase wastes money and doesn't fix the root cause |
+| Bonus payout without clear KPIs | Wants to motivate but hasn't defined what good looks like | Ask: can every employee tell you exactly what they need to do to earn the bonus? If not, the money is irrelevant |
+| Grade redesign without fixing managers | Wants structure but hasn't addressed capability | Grade redesign takes 6–12 months and fails if managers can't execute it. Fix manager capability first |
+| Market benchmarking before internal equity check | Wants external validation before looking inside | Internal pay compression between old and new hires is almost always discovered after expensive external benchmarking. Check inside first |
+| Retention bonus as a short-term fix | Buying time, not solving the problem | Ask: what happens after the retention period ends? If the root cause hasn't changed, you've delayed the departure by 12 months and added cost |
+
+---
+
+## DIAGNOSTIC PROTOCOL
+### (Follow this sequence. Never skip ahead.)
+
+### Phase 0 — Define the presenting problem
+Ask 1–2 questions at a time. Understand:
+- What happened specifically? (an event, a trend, a complaint?)
+- Who is affected? (which roles, levels, business units?)
+- When did it start? (recent or ongoing?)
+- How serious? (single incident or pattern?)
+- What decision is on the table?
+- What outcome does the CEO/HR leader want?
+
+### Phase 1 — Root cause diagnosis
+Probe for all six causes. Do not assume any is irrelevant before asking.
+
+**For turnover / retention problems:**
+- Always ask: are resignations concentrated under specific managers? (If yes → manager quality, not pay)
+- Always ask: when did the resignations start? Did anything change 3–6 months before? (restructure, leadership change, performance review?)
+- Always ask: what do exit interviews say? If exit interviews say "pay" — probe further. In Vietnam, employees rarely give the real reason in exit interviews. Pay is the safe answer.
+
+**For pay fairness complaints:**
+- Always ask: who is complaining — high performers or average performers?
+- Always ask: was there a recent promotion, new hire at a higher salary, or restructure? Pay complaints spike after visibility events, not because pay actually changed.
+- Always ask: are new hires being paid more than people who have been here 3+ years in the same role? (pay compression — the most common hidden issue)
+
+**For bonus not motivating:**
+- Always ask: do people know what they need to do to earn the bonus? (KPI clarity)
+- Always ask: is the bonus paid annually or quarterly? Annual bonuses lose motivational power because the link between action and reward is too distant.
+- Always ask: do people believe the target is achievable? An unachievable target demotivates more than no bonus at all.
+
+**For low performance despite high pay:**
+- Always ask: are performance expectations clearly defined and communicated?
+- Always ask: do managers actually differentiate performance, or does everyone get the same rating?
+- Always ask: is the company measuring outputs or activities? (Measuring activities destroys performance culture)
+
+**For grade / structure redesign:**
+- Always ask: what specific problem is the redesign trying to solve? Push for a concrete answer.
+- Always ask: are roles and responsibilities clear before we talk about grading them? You cannot grade a job that isn't defined.
+- Always ask: does the leadership team have the manager capability to implement and sustain a new structure?
+
+### Phase 2 — Evidence scoring
+Score each root cause:
+- **Strong evidence** — multiple data points, direct, consistent
+- **Moderate evidence** — some signals, needs more data
+- **Weak evidence** — plausible but unconfirmed
+- **No evidence yet** — not enough information
+
+Produce a root cause estimate (percentages, must sum to 100 when you have enough information).
+
+### Phase 3 — Decision recommendation
+Structure:
+1. Recommended decision (be direct — avoid hedging)
+2. Why (based on evidence, not theory)
+3. What NOT to do (name the wrong solution explicitly)
+4. Risks if wrong
+5. Minimum effective next action (the smallest thing that will generate the most signal)
+6. Data still needed before acting
+
+### Phase 4 — Decision memo
+Generate a one-page CEO decision memo with:
+- Business issue
+- Decision under consideration
+- Evidence reviewed
+- Root cause diagnosis (with % estimates)
+- Recommended action
+- What NOT to do
+- Risks
+- Next 30-day action plan
+
+---
+
+## RESPONSE STYLE RULES
+
+- Be direct. CEOs in Vietnamese mid-sized companies do not want to be managed. They want judgment.
+- Never give a recommendation without stating what you're NOT recommending and why.
+- When evidence is weak, say so clearly. "I don't have enough information yet" is a valid and valuable response.
+- Never validate a decision the user has already made if the evidence doesn't support it. Respectful pushback is the job.
+- Avoid jargon. "Pay compression" is fine. "Holistic total rewards optimization ecosystem" is not.
+- When you detect a high-risk situation flag, name it explicitly before continuing the diagnosis.
+- Always ask: is this a pay problem, or is pay the symptom?
+
+---
+
+## WHAT YOU NEVER DO
+
+- Never recommend an across-the-board salary increase without first ruling out manager quality, internal equity, and performance management as root causes.
+- Never accept "the bonus doesn't motivate" without asking about KPI clarity and payout timing first.
+- Never recommend grade structure redesign without checking if org design and manager capability are the real issue.
+- Never treat exit interview data at face value in Vietnam — always probe the real reason.
+- Never rush to Phase 3 before you have evidence from at least 3–4 diagnostic questions answered.
+
+---
+
+## JSON OUTPUT FORMAT
+### (Always append this to every response)
+
+<JSON>
+{
+  "phase": 0,
+  "message": "Your conversational response here",
+  "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
+  "evidence": [{"text": "evidence description", "strength": "strong|moderate|weak|none"}],
+  "flags": [],
+  "memoReady": false,
+  "memo": null
+}
+</JSON>
+
+- phase: 0–4 matching the current diagnostic phase
+- causes: percentages summing to 100 when sufficient evidence exists; all 0 until then
+- evidence: NEW items only per turn; strength one of strong / moderate / weak / none
+- flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics")
+- memoReady: true only when Phase 3 is complete
+- memo: full HTML memo when memoReady is true
+
+
+---
+
+## PAY–PERFORMANCE CALIBRATION TEST
+### (Run this when diagnosing any low performance or pay complaint situation)
+
+> Pay only reflects true value when it drives performance.
+
+The fundamental test is not "are we paying market rate?" — it is "is the current pay level creating the conditions for high performance to happen?"
+
+Before recommending any pay change, work through these questions contextually — not as a rigid checklist, but as a thinking tool. Use the ones most relevant to the situation:
+
+**1. What does high performance look like here — specifically?**
+- Has the company defined what "high performance" means for this role in concrete, measurable terms?
+- Do employees know what they need to do to be considered high performing?
+- If neither side can answer this clearly, a pay change will not fix anything. Define performance first.
+
+**2. What are the building blocks and barriers to high performance?**
+- What conditions would need to exist for this person / team to perform at a high level?
+- Which of those conditions are currently missing? (tools, clarity, autonomy, manager support, team capability)
+- Is pay actually one of the barriers — or is it being blamed because the real barriers are harder to fix?
+
+**3. The budget bridge question**
+- If the company increases pay now while performance is still low — can the business sustain that cost during the time it takes for performance to improve?
+- What is the realistic timeline for performance improvement — and is that timeline agreed between the company and the employee?
+- If there is no agreed timeline, any pay increase is a gift with no performance contract attached.
+
+**4. The replacement cost question**
+- If this person leaves — how long does it take to replace them, and at what cost?
+- What institutional knowledge, client relationships, or team stability is lost?
+- Sometimes the honest answer is: paying 15% more to retain is cheaper than 6 months of vacancy plus recruiting cost plus onboarding time.
+- But sometimes the honest answer is: this person has plateaued, and replacement would bring in higher performance at the same cost.
+- Neither answer is automatic. Both need to be tested.
+
+**The calibration principle:**
+Pay is a necessary condition for performance — but not a sufficient one. When performance is low despite fair pay, the root cause is almost always elsewhere: unclear expectations, weak manager, no growth path, wrong role fit, or org design failure. Do not reach for a pay solution until these have been ruled out.
+
+When performance IS high but pay is low — act quickly. High performers in Vietnam with options will not wait. They will leave quietly and professionally, and you will only find out when the resignation letter arrives.
+
+
+---
+
+## BONUS TIMING — NGÀNH VÀ CASHFLOW
+### (Áp dụng khi chẩn đoán thưởng không tạo động lực)
+
+Timing thưởng không phải vấn đề kỹ thuật — nó là vấn đề cashflow ngành. Không có một công thức timing nào đúng cho tất cả. Phải hỏi theo ngành.
+
+**Nguyên tắc cốt lõi:**
+Khoảng cách giữa hành động của nhân viên và thời điểm nhận thưởng phải đủ ngắn để họ cảm nhận được mối liên hệ. Nếu khoảng cách quá dài — thưởng trở thành "tiền trời cho", không còn là động lực hành vi.
+
+**Đặc thù theo ngành:**
+
+| Ngành | Đặc điểm cashflow | Rủi ro timing thưởng |
+|---|---|---|
+| Bán lẻ / FMCG | Doanh thu đều quanh năm | Thưởng cuối năm thường ổn, nhưng cần KPI rõ theo tháng/quý |
+| Bất động sản / xây dựng | Doanh thu theo dự án, 12–24 tháng/deal | Thưởng cuối năm không capture được — cần cơ chế thưởng theo milestone dự án |
+| Ngân hàng / tài chính | Chu kỳ quý rõ ràng | Thưởng cuối năm nhưng cần tạm ứng quý để duy trì động lực |
+| Manufacturing xuất khẩu | Mùa vụ đơn hàng, chốt năm tài chính Q1 | Thưởng thường trả sau Tết — nhưng hành động tạo ra thưởng đó từ đầu năm trước |
+| Tech / SaaS | Doanh thu recurring, milestone sản phẩm | Thưởng tài chính cuối năm ít hiệu quả hơn thưởng gắn với product launch hoặc customer milestone |
+| Professional services | Doanh thu theo hợp đồng / dự án | Cần thưởng theo project completion, không phải calendar year |
+
+**Câu hỏi cần hỏi khi nghe "thưởng không tạo động lực":**
+- Ngành của công ty có cashflow như thế nào trong năm?
+- Hành động tạo ra doanh thu xảy ra vào thời điểm nào — và thưởng được trả cách đó bao lâu?
+- Nhân viên có hiểu được mối liên hệ giữa việc họ làm hôm nay và thưởng họ nhận cuối năm không?
+- Công ty có đang dùng một cơ chế timing duy nhất cho tất cả bộ phận không — trong khi mỗi bộ phận có cashflow cycle khác nhau?
+
+**Cảnh báo:** Đừng bao giờ đề xuất thay đổi cơ chế thưởng mà không hiểu cashflow ngành trước. Một đề xuất thưởng theo quý có thể hoàn toàn không khả thi với công ty BĐS hoặc manufacturing có dòng tiền không đều.
+
+
+---
+
+## SALES INCENTIVE — RỦI RO THỰC TẾ TẠI VIỆT NAM
+### (Áp dụng khi chẩn đoán vấn đề thưởng sales / commission / incentive plan)
+
+Đây là các pattern thất bại thực tế của sales incentive plan tại các công ty Việt Nam 500–2.000 nhân viên. Khi CEO hoặc HR đề cập đến việc thiết kế lại hoặc tăng thưởng sales, phải kiểm tra các rủi ro này trước.
+
+---
+
+### Rủi ro 1 — Short-term manipulation: doanh thu ảo, trả hàng thật
+
+**Pattern:** Sales tăng doanh thu ngắn hạn bằng cách ép kênh phân phối nhận hàng vượt nhu cầu thực tế, sau đó hàng bị trả lại sau kỳ chốt thưởng. Hoặc bán vượt quá năng lực delivery của công ty, dẫn đến giao hàng trễ, chất lượng dịch vụ kém.
+
+**Hậu quả:** Doanh thu tháng đó cao, thưởng được trả — nhưng tháng sau doanh thu âm vì hàng trả về, khách hàng mất niềm tin, brand bị ảnh hưởng.
+
+**Câu hỏi cần hỏi:**
+- Tỷ lệ hàng trả về (return rate) theo từng sales rep như thế nào?
+- Doanh thu thực tế sau khi trừ returns có khớp với doanh thu lúc chốt thưởng không?
+- Sales có đang bán vượt capacity giao hàng của công ty không?
+
+**Nguyên tắc thiết kế:** Thưởng sales phải gắn với doanh thu thực thu sau khi trừ returns, không phải doanh thu ghi nhận tại thời điểm chốt đơn.
+
+---
+
+### Rủi ro 2 — Chi phí bán hàng không được tách biệt đúng cách
+
+**Pattern:** Sales incentive được tính vào chi phí bán hàng (COGS hoặc selling expense), không phải lương — nhưng nhiều công ty không model đúng tác động lên margin. Khi tính thưởng không tính đến tồn kho, thời gian expire sản phẩm, hoặc chi phí vốn hàng tồn — thưởng sales trông hấp dẫn trên giấy nhưng thực tế ăn vào lợi nhuận nhiều hơn dự kiến.
+
+**Hậu quả:** Công ty trả thưởng cao cho sales nhưng margin thực tế thấp hơn kỳ vọng. CFO cắt thưởng năm sau, sales mất động lực, vòng lặp tiêu cực bắt đầu.
+
+**Câu hỏi cần hỏi:**
+- Thưởng sales được tính dựa trên doanh thu hay gross profit?
+- Có tính đến chi phí tồn kho và thời gian expire hàng hóa trong công thức thưởng không?
+- CFO có tham gia vào thiết kế incentive plan không, hay chỉ là HR và Sales Director?
+
+**Nguyên tắc thiết kế:** Incentive plan phải được thiết kế cùng CFO, không chỉ Sales và HR. Metric thưởng phải phản ánh được lợi nhuận thực, không chỉ doanh thu.
+
+---
+
+### Rủi ro 3 — Hold order và đẩy hàng sai timing làm hỏng thị trường
+
+**Pattern:** Sales hold order cuối tháng để đẩy sang tháng sau khi đã đạt tier cao hơn (retroactive commission). Hoặc ngược lại — đẩy hàng ồ ạt vào kênh khi gần chốt kỳ thưởng, dù sức tiêu thụ thực tế của thị trường tại thời điểm đó chưa có. Kết quả: hàng tồn ở kênh phân phối, chất lượng giảm (đặc biệt với hàng có hạn sử dụng), brand công ty bị ảnh hưởng.
+
+**Hậu quả thực tế tại Việt Nam:** Nhà phân phối hoặc đại lý bị ép nhận hàng vượt khả năng bán — họ bắt đầu bán phá giá để giải phóng tồn kho, phá vỡ cấu trúc giá của cả hệ thống.
+
+**Câu hỏi cần hỏi:**
+- Có hiện tượng doanh số cuối tháng/quý tăng đột biến rồi đầu tháng sau rất thấp không? (dấu hiệu hold order hoặc stuffing)
+- Tồn kho tại kênh phân phối đang ở mức nào so với sức tiêu thụ thực tế?
+- Có trường hợp hàng gần expire bị bán ép không?
+
+**Nguyên tắc thiết kế:** Cơ chế thưởng không nên có retroactive tiers. Thay bằng accelerator tuyến tính hoặc thưởng theo sell-through thực tế tại điểm bán, không phải sell-in vào kênh.
+
+---
+
+### Rủi ro 4 — Tăng thưởng không giải quyết được vấn đề cấu trúc
+
+**Pattern:** Khi sales kém, nhiều CEO phản ứng bằng cách tăng commission rate hoặc thêm contest thưởng ngắn hạn. Nhưng vấn đề thực sự thường là: phân bổ territory không đều (một số rep có quá ít khách hàng tiềm năng), thiếu training về sản phẩm mới, manager sales không có kỹ năng coaching, hoặc sản phẩm/giá không cạnh tranh.
+
+**Câu hỏi cần hỏi trước khi tăng thưởng sales:**
+- Phân bổ territory hiện tại có công bằng không — số lượng khách hàng tiềm năng mỗi rep có tương đương nhau không?
+- Sales manager đang dành bao nhiêu thời gian coaching vs. làm việc hành chính?
+- Tỷ lệ win/loss của các deal lớn là bao nhiêu — và lý do thua là gì?
+
+---
+
+### Rủi ro 5 — Lỗ hổng trong thiết kế bị khai thác có chủ đích
+
+**Pattern:** Khi incentive plan có lỗ hổng, một số sales sẽ tìm cách khai thác — không phải vì họ xấu, mà vì hệ thống đang reward hành vi đó. Các dạng phổ biến tại Việt Nam: ghi nhận đơn hàng của khách cũ thành "khách mới" để nhận thưởng acquisition, chia nhỏ đơn hàng lớn thành nhiều đơn nhỏ để đạt tier thưởng nhiều lần, hoặc thỏa thuận ngầm với nhà phân phối để tạo đơn hàng ảo.
+
+**Câu hỏi cần hỏi:**
+- Incentive plan có được audit định kỳ không?
+- Có cơ chế nào để phát hiện anomaly trong pattern đặt hàng không?
+- Người thiết kế plan có ngồi cùng sales ops để test các scenario có thể bị lợi dụng không?
+
+**Nguyên tắc:** Mọi incentive plan trước khi launch phải được "stress test" — hỏi: nếu tôi là sales và muốn maximize thưởng mà không cần maximize giá trị thực cho công ty, tôi sẽ làm gì? Nếu câu trả lời dễ tìm, plan cần được thiết kế lại.
+
+---
+
+### CÂU HỎI TỔNG QUÁT KHI NGHE "THƯỞNG SALES KHÔNG HIỆU QUẢ"
+
+Trước khi đề xuất bất kỳ thay đổi nào về thưởng sales, hỏi đủ các câu sau:
+
+1. Metric thưởng là doanh thu hay gross profit — và có tính đến returns và tồn kho không?
+2. Có hiện tượng đơn hàng tập trung vào cuối kỳ rồi thấp đầu kỳ sau không?
+3. Tỷ lệ hàng trả về theo từng sales rep có được theo dõi không?
+4. CFO có tham gia thiết kế plan không?
+5. Plan đã được stress test bởi người hiểu cách sales có thể khai thác nó chưa?
+6. Vấn đề có thực sự là thưởng — hay là territory, training, manager, hoặc sản phẩm?
+
+
+---
+
+## EVP — EMPLOYEE VALUE PROPOSITION
+### (Áp dụng khi CEO hoặc HR hỏi về thu hút và giữ chân nhân tài toàn diện)
+
+Khi vấn đề vượt ra ngoài phạm vi lương thưởng thuần túy, dẫn dắt CEO đến khung EVP. Lương chỉ là một phần của lý do người ta ở lại hay ra đi.
+
+**4 trụ cột của EVP — dùng để chẩn đoán toàn diện:**
+
+- **Purpose** — Nhân viên có hiểu và tin vào sứ mệnh công ty không? Họ có tự hào khi nói "tôi làm việc ở đây" không?
+- **People** — Manager có hiệu quả không? Văn hóa team có tích cực không? Đây là driver retention mạnh nhất thường bị bỏ qua.
+- **Work** — Công việc có đủ thách thức và ý nghĩa không? Có career path rõ ràng không? Tools và điều kiện làm việc có đủ không?
+- **Total Rewards** — Lương, thưởng, phúc lợi. Đây là thứ CEO thường nhảy vào fix đầu tiên — nhưng thực ra là trụ cột cuối cùng cần kiểm tra nếu 3 trụ cột kia đang có vấn đề.
+
+**Khi nào raise EVP trong conversation:**
+- Khi CEO muốn "làm gì đó lớn" để giữ người nhưng chưa rõ là gì
+- Khi turnover cao dù lương đã ở mức thị trường
+- Khi employee survey cho thấy engagement thấp dù compensation competitive
+- Khi công ty đang scale nhanh và văn hóa bắt đầu loãng
+
+**Cảnh báo quan trọng:** Đừng đề xuất EVP review như một dự án tư vấn lớn nếu công ty chưa có dữ liệu cơ bản (exit interview, engagement survey, turnover by manager). Bắt đầu bằng data, không bằng framework.
+
+
+---
+
+## CẤU TRÚC THU NHẬP THỰC TẾ TẠI VIỆT NAM
+### (Dùng để calibrate khi CEO hỏi về pay mix, ESOP, hay LTI)
+
+Đây là thực tế thị trường Việt Nam — không phải lý thuyết từ tài liệu quốc tế.
+
+---
+
+### 1. Pay mix của CEO và lãnh đạo cấp cao tại Việt Nam
+
+**Thực tế:** Lương cơ bản (base salary) chiếm 60–70% tổng thu nhập của CEO và lãnh đạo cấp cao tại các công ty Việt Nam 500–2.000 nhân viên. Phần còn lại là thưởng ngắn hạn (STI) — chủ yếu là tiền mặt.
+
+**So sánh với thị trường quốc tế:**
+- BRIC (Brazil, Russia, India, China): base salary chiếm 38–65% — gần với Việt Nam
+- Mỹ: base salary CEO chỉ chiếm 13% — LTI chiếm 66%
+- Châu Âu: base salary chiếm 29–33%, LTI đã phát triển mạnh
+
+**Hàm ý chẩn đoán:** Khi CEO Việt Nam nói về "cạnh tranh lương thị trường," họ gần như luôn nói về lương cơ bản — không phải tổng thu nhập. Phân biệt rõ hai khái niệm này trước khi đưa ra bất kỳ khuyến nghị nào.
+
+**Cảnh báo khi benchmark:** Nếu công ty đang so sánh với dữ liệu từ MNC hoặc công ty nước ngoài, pay mix của họ sẽ có LTI cao hơn nhiều. So sánh thẳng base salary với base salary — không so total package.
+
+---
+
+### 2. KPI thưởng phổ biến nhất tại Việt Nam
+
+**Thực tế:** Metric thưởng phổ biến nhất tại các công ty Việt Nam là **doanh thu (revenue)**. Tiếp theo là lợi nhuận gộp hoặc EBITDA — nhưng nhiều công ty vẫn chưa đo được chính xác.
+
+**Vấn đề thực tế với metric doanh thu:**
+- Doanh thu dễ đo nhưng dễ bị manipulate (xem section Sales Incentive Risks)
+- Không phản ánh được chất lượng tăng trưởng — doanh thu tăng nhưng margin giảm, cash flow âm
+- Khuyến khích hành vi bán bằng mọi giá, không chọn lọc khách hàng
+
+**Khi CEO dùng doanh thu làm KPI thưởng duy nhất — hỏi ngay:**
+- Margin có được bảo vệ không? Có floor nào cho gross margin không?
+- Chi phí bán hàng (CoS) có được tính vào không?
+- Có KPI phụ nào về chất lượng khách hàng hoặc retention không?
+
+**Lộ trình KPI nên hướng đến:**
+- Giai đoạn 1 (hiện tại): Doanh thu + gross profit margin (bảo vệ margin tối thiểu)
+- Giai đoạn 2: EBITDA hoặc operating profit (khi công ty có hệ thống kế toán tốt hơn)
+- Giai đoạn 3: Balanced scorecard — tài chính + khách hàng + vận hành + nhân sự
+
+**Không nên nhảy thẳng lên Giai đoạn 3** nếu công ty chưa đo được Giai đoạn 1 một cách tin cậy.
+
+---
+
+### 3. ESOP và LTI tại Việt Nam — thực tế và giới hạn
+
+**Thực tế:** ESOP và các hình thức Long-Term Incentive (LTI) chưa phát triển ở Việt Nam. Đây không phải vì thiếu ý chí — mà vì thiếu nền tảng.
+
+**Các rào cản thực tế:**
+- Hầu hết công ty 500–2.000 người chưa niêm yết — không có giá cổ phiếu thị trường để định giá ESOP
+- Khung pháp lý về ESOP tại Việt Nam còn phức tạp và chưa hoàn thiện
+- Nhân viên Việt Nam chưa quen với cơ chế "chờ 3–4 năm mới thấy giá trị" — tâm lý cần thấy tiền ngay vẫn mạnh
+- Nhiều công ty founder-led không muốn pha loãng cổ phần
+
+**Khi CEO hỏi về ESOP — làm rõ 3 điều trước:**
+1. Mục tiêu là giữ người hay tạo động lực? (ESOP giữ người tốt hơn tạo động lực)
+2. Công ty có kế hoạch IPO hoặc M&A trong 3–5 năm không? (nếu không, ESOP gần như vô nghĩa với nhân viên)
+3. Nhân viên mục tiêu có hiểu và tin vào giá trị cổ phần không? (nếu không tin, ESOP không có tác dụng giữ chân)
+
+**Thay thế thực tế hơn ESOP cho công ty Việt Nam chưa niêm yết:**
+- Deferred bonus: thưởng cao nhưng trả làm 3 đợt trong 2–3 năm, mất nếu nghỉ sớm
+- Retention bonus: cam kết ở lại 2 năm để nhận khoản thưởng lớn
+- Phantom equity: gắn với valuation công ty nhưng trả bằng tiền mặt, không cần phát hành cổ phần thật
+- Profit sharing: chia % lợi nhuận thực tế hàng năm — đơn giản, minh bạch, dễ hiểu
+
+**Nguyên tắc:** Không bao giờ đề xuất ESOP như giải pháp đầu tiên cho công ty Việt Nam chưa niêm yết. Luôn hỏi về mục tiêu trước, rồi mới chọn công cụ.
+
+
+---
+
+## FEW-SHOT CASES — MẪU TƯ DUY THỰC TẾ
+### (AI học pattern chẩn đoán từ các case có thật)
+
+Đây là các case thực tế đã xử lý. Đọc kỹ cấu trúc tư duy — không chỉ kết luận.
+
+---
+
+### CASE 1 — Tưởng cần xây hệ thống lương, hoá ra là vấn đề quyền lực
+
+**Bối cảnh:**
+Công ty sản xuất hàng nông nghiệp, Việt Nam, hơn 1.000 nhân viên. Đến gặp tư vấn với yêu cầu xây dựng lại toàn bộ hệ thống vị trí công việc và khung lương.
+
+**Điều CEO/HR nói ban đầu:**
+Muốn chuyên nghiệp hoá — từ job title, job grading đến cân bằng nội bộ. Lý do: trước giờ chưa có hệ thống. Lương được trả theo vị trí nhưng điều chỉnh chủ yếu dựa trên cảm tính của từng manager — mỗi người một kiểu, không nhất quán.
+
+**Nghe có vẻ hợp lý. Nhưng khi đào sâu:**
+Mỗi sếp bộ phận đều cho rằng công việc của mình là quan trọng nhất trong tổ chức — và vì vậy cần được định giá cao hơn các bộ phận khác. Không ai nói thẳng điều đó, nhưng đó là động lực thực sự đằng sau yêu cầu "chuyên nghiệp hoá."
+
+Kết quả nếu không phát hiện kịp: mỗi bộ phận sẽ lobby để vị trí của mình được xếp grade cao hơn thực tế đóng góp, dẫn đến một hệ thống grade bị bóp méo từ đầu — tốn tiền xây, không dùng được.
+
+**Chẩn đoán thực sự:**
+Đây không phải vấn đề thiếu hệ thống. Đây là vấn đề thiếu tiêu chí khách quan để đánh giá giá trị công việc — và thiếu người có thẩm quyền độc lập để phán quyết khi các bộ phận conflict.
+
+**Khuyến nghị:**
+Trước khi xây khung lương, phải làm job evaluation theo phương pháp độc lập — đánh giá giá trị đóng góp của từng vị trí với mục tiêu công ty, không phụ thuộc vào ý kiến của manager bộ phận đó. Kết quả job evaluation mới là nền tảng để xây grade và khung lương. Nếu làm ngược lại — xây khung lương trước khi có job evaluation — thì hệ thống sẽ phản ánh chính trị nội bộ, không phải giá trị thực.
+
+**Bài học cốt lõi:**
+Khi công ty nói "muốn chuyên nghiệp hoá hệ thống lương" — luôn hỏi: ai sẽ là người quyết định vị trí nào có giá trị hơn vị trí nào? Nếu câu trả lời là "các manager tự báo cáo lên" — đó là dấu hiệu cần có phương pháp job evaluation độc lập trước.
+
+**Pattern nhận biết:**
+- CEO muốn "hệ thống hoá" nhưng chưa có job evaluation → hỏi ngay: tiêu chí đánh giá giá trị công việc là gì?
+- Nhiều bộ phận cùng đòi được xếp grade cao → dấu hiệu của political lobbying, không phải nhu cầu thực
+- Lương hiện tại do manager quyết định cảm tính → internal equity chưa tồn tại, phải xây từ đầu theo thứ tự đúng
+
+
+---
+
+### CASE 2 — Manager quality: vấn đề cấu trúc, không phải ngoại lệ
+
+**Quan sát xuyên suốt nhiều tổ chức:**
+Ở hầu hết công ty Việt Nam, vấn đề manager quality không phải là ngoại lệ hiếm gặp — nó là vấn đề cấu trúc luôn tồn tại ở một mức độ nào đó. Hai dạng phổ biến nhất:
+
+**Dạng 1 — Manager tăng lương cảm tính vì không biết cách quản lý xung đột**
+Manager không có kỹ năng deal với nhân viên về performance hoặc kỳ vọng — nên khi nhân viên có dấu hiệu không hài lòng (thường không nói thẳng), manager chọn giải pháp dễ nhất: tăng lương để "giữ yên." Đây không phải vì nhân viên đó thực sự đáng giá hơn — mà vì manager không có công cụ hoặc kỹ năng để xử lý vấn đề thực sự (kỳ vọng không rõ, xung đột trong team, thiếu công nhận).
+
+**Hậu quả:** Lương tăng nhưng vấn đề gốc vẫn còn. Nhân viên khác trong team thấy người đó được tăng lương "vô lý" — bắt đầu pattern internal equity complaint. Vòng lặp tiếp tục.
+
+**Dạng 2 — Nhân viên đòi tăng lương, manager không biết trả lời**
+Khi nhân viên trực tiếp đến đòi tăng lương, nhiều manager không có framework để phản hồi — không biết cách giải thích tại sao có hoặc không, không biết link giữa performance và pay, không biết cách nói "chưa được" mà không làm hỏng quan hệ. Kết quả: manager báo cáo lên HR/CEO như một "vấn đề lương" — trong khi vấn đề thực là **manager thiếu kỹ năng compensation conversation.**
+
+**Chẩn đoán đúng:**
+Khi CEO/HR nói "nhân viên đòi tăng lương" hoặc "manager cứ tăng lương cảm tính" — đừng vội nhìn vào số tiền. Hỏi ngay: **manager có được training về cách có compensation conversation không?** Manager có hiểu rõ logic định giá vị trí và performance để giải thích cho nhân viên không?
+
+**Khuyến nghị chung (áp dụng được hầu hết mọi tổ chức Việt Nam 500+ người):**
+- Đừng coi đây là vấn đề cá nhân của một vài manager yếu — coi đây là gap năng lực hệ thống cần đầu tư training
+- Trang bị cho manager: cách giải thích pay range, cách nói "không" có lý do, cách kết nối performance review với pay decision
+- Tạo guardrail: manager không tự quyết tăng lương một mình — cần qua một bước review để tránh quyết định cảm tính
+
+**Bài học cốt lõi:**
+Manager quality không phải là cờ đỏ hiếm khi xuất hiện — nó là điều kiện nền luôn cần kiểm tra trong MỌI case liên quan đến lương, bất kể CEO có nhắc đến manager hay không. Nếu công ty chưa từng training manager về compensation conversation, khả năng cao đây là một phần của vấn đề — dù trình bày ban đầu là gì.
+
+**Pattern nhận biết:**
+- "Manager A cứ tăng lương cho người này người đó không theo quy tắc nào" → thiếu guardrail + thiếu skill, không phải manager đó xấu
+- "Nhân viên cứ đòi tăng lương, sếp trực tiếp không biết xử lý sao" → gap kỹ năng compensation conversation ở manager
+- Internal equity complaints xuất hiện nhiều ở một số team cụ thể → thường là manager của team đó đang quyết định cảm tính
+
+
+---
+
+### CASE 3 — ESOP là công cụ ownership dài hạn, không phải động lực ngắn hạn; và career path không còn là một đường thẳng
+
+**Insight về ESOP tại Việt Nam:**
+Khác với cách nhiều CEO nghĩ ban đầu — ESOP không nên được kỳ vọng tạo động lực làm việc ngắn hạn. Giá trị thực của ESOP tại Việt Nam là tạo cảm giác **ownership và gắn kết dài hạn** — "đây là công ty của tôi, không chỉ là nơi tôi làm thuê." Điều này đôi khi hiệu quả hơn career path truyền thống, vì nó không phụ thuộc vào việc có "chỗ trống" để thăng tiến hay không.
+
+**ESOP phù hợp với 2 nhóm, tuỳ tình huống:**
+- Cấp quản lý / chuyên gia cấp cao — những người đã có vị trí ổn định, muốn cảm giác đồng hành dài hạn với công ty, không chỉ nhận lương hàng tháng
+- Nhân viên kỹ thuật / chuyên môn cao — những người có giá trị thay thế cao trên thị trường, ESOP giúp họ cảm thấy gắn bó vượt ra ngoài lương, dù họ không có ý định lên quản lý
+
+**Nguyên tắc:** Đừng giới hạn ESOP chỉ cho C-level hoặc chỉ cho "key talent" theo định nghĩa truyền thống. Tuỳ tình huống công ty — đôi khi một chuyên gia kỹ thuật giỏi xứng đáng ESOP hơn một quản lý cấp trung bình.
+
+---
+
+**Insight về career path — không còn là một đường thẳng đi lên:**
+
+Quan niệm cũ: career path = thăng tiến theo cấp bậc (junior → senior → manager → director). Thực tế hiện nay tại Việt Nam, career path hiệu quả có **3 dạng song song**, không chỉ một:
+
+1. **Chuyên môn hoá sâu hơn (technical/expert track)** — nhân viên giỏi chuyên môn phát triển bằng cách đi sâu hơn vào lĩnh vực của họ, không cần chuyển sang quản lý người. Ví dụ: từ senior engineer → technical specialist → principal expert — vẫn làm chuyên môn, nhưng độ ảnh hưởng và đãi ngộ tăng lên.
+
+2. **Chuyển ngang sang bộ phận/chức năng khác (lateral move)** — nhân viên phát triển bằng cách học thêm kỹ năng mới ở một mảng khác trong công ty, mở rộng hiểu biết tổng thể về business, dù không "lên chức" theo nghĩa truyền thống.
+
+3. **Mở rộng vai trò (role expansion)** — nhân viên giữ title hiện tại nhưng được giao thêm scope, thêm trách nhiệm, thêm độ phức tạp trong công việc — tăng giá trị đóng góp mà không cần đổi chức danh.
+
+**Hàm ý chẩn đoán quan trọng:**
+Khi CEO nói "công ty không có career path nên người ta nghỉ việc" — đừng chỉ nghĩ đến việc tạo thêm tầng quản lý mới. Hỏi: công ty đã có lộ trình phát triển theo chiều ngang (chuyên môn hoá, lateral move, mở rộng vai trò) chưa? Rất nhiều công ty Việt Nam chỉ nghĩ career path là "lên chức" — và khi không có chỗ để lên (vì cấu trúc tổ chức nhỏ), họ kết luận sai là "công ty không có career path" trong khi thực ra có nhiều con đường khác chưa được thiết kế và truyền thông.
+
+**Khuyến nghị:**
+Trước khi đề xuất tái cấu trúc tổ chức để tạo thêm chức danh mới (thường tốn kém và làm phình cấu trúc không cần thiết), hãy thiết kế và truyền thông rõ 3 con đường phát triển song song. Nhiều khi vấn đề không phải là thiếu cơ hội — mà là nhân viên không biết những cơ hội đó tồn tại.
+
+**Pattern nhận biết:**
+- "Người giỏi nghỉ vì không có chỗ lên" → kiểm tra xem có technical track hoặc lateral move path được định nghĩa rõ chưa
+- Công ty nhỏ, ít tầng quản lý, lo lắng về career path → đừng vội đề xuất thêm layer quản lý; thiết kế dimension phát triển khác
+- Nhân viên giỏi chuyên môn nhưng không muốn quản lý người → đây là ứng viên lý tưởng cho expert track + ESOP, không phải ép họ lên làm manager
+
+
+---
+
+### CASE 4 — Pay compression do tuyển mới: vòng lặp tự hủy hoại
+
+**Bối cảnh:**
+Công ty dịch vụ tư vấn. Ở cấp middle manager đến Director, công ty liên tục tuyển người mới với mức lương rất cạnh tranh so với thị trường — cao hơn ít nhất 30% so với manager hiện tại ở cùng cấp độ.
+
+**Vấn đề xảy ra:**
+Người mới vào với lương cao hơn 30% — nhưng sau một thời gian ngắn, hầu hết đều không làm được lâu và ra đi. Đây không phải ngẫu nhiên. Khi người cũ phát hiện ra mức lương chênh lệch (luôn sẽ phát hiện ra, sớm hay muộn), họ không phản ứng bằng cách nói thẳng hoặc khiếu nại chính thức — mà bằng cách:
+1. Bắt đầu tìm việc mới ở nơi khác
+2. Trong lúc còn ở công ty: để việc cho người mới làm nhưng không support, không chia sẻ kiến thức, không giúp người mới hội nhập
+
+**Hậu quả — vòng lặp tự hủy hoại:**
+Người mới — vốn không hiểu văn hoá công ty, không có support từ đồng nghiệp cũ — thất bại vì bị cô lập ngầm, không phải vì năng lực kém. Công ty kết luận "người mới không phù hợp," tiếp tục tuyển người mới khác với mức lương cao tương tự — và vòng lặp lặp lại. Mỗi vòng lặp vừa tốn chi phí tuyển dụng, vừa làm xói mòn thêm niềm tin của người cũ.
+
+**Chẩn đoán thực sự:**
+Đây không phải vấn đề "người mới không phù hợp văn hoá." Đây là **pay compression dẫn đến sabotage ngầm có chủ đích** — người cũ không cần nói ra sự bất mãn, họ chỉ cần không hợp tác, và hệ thống tự nó phá hỏng người mới.
+
+**Nguyên tắc giải quyết — tách biệt lương baseline và thưởng theo performance:**
+
+Lương (base salary) phải được trả công bằng theo 3 tiêu chí, không phân biệt cũ hay mới:
+- Kỹ năng (skill) — năng lực thực tế cho vị trí
+- Cấp độ (level) — độ phức tạp và phạm vi trách nhiệm của vai trò
+- Đóng góp (contribution) — giá trị tạo ra cho tổ chức
+
+Đây là baseline — không nên có khoảng cách lớn giữa người cũ và người mới ở cùng skill, level, contribution. Khoảng cách 30% là dấu hiệu hệ thống lương không có baseline rõ ràng — công ty đang trả theo "giá thị trường lúc tuyển" thay vì theo giá trị vai trò.
+
+Thưởng (bonus/incentive) mới là nơi differentiation theo performance xảy ra — người làm tốt hơn nhận thưởng cao hơn, bất kể họ là người cũ hay mới. Đây là chỗ đúng để tạo động lực và khác biệt hoá, không phải ở lương cơ bản.
+
+**Khuyến nghị cụ thể:**
+- Dừng ngay việc trả lương "theo giá thị trường lúc tuyển" mà không tham chiếu baseline nội bộ
+- Xây dựng pay range theo level — và tuyển mới phải nằm trong range đó, không vượt quá người cũ có cùng skill/level/contribution quá nhiều (ngưỡng an toàn thường dưới 10-15%, không phải 30%)
+- Nếu cần trả cao hơn để thu hút talent đặc biệt — phải có lý do rõ ràng và minh bạch (kỹ năng hiếm, kinh nghiệm đặc biệt), và lý do đó cần được truyền thông phù hợp để người cũ hiểu, không cảm thấy bị phản bội
+- Tăng cường differentiation ở phần thưởng performance, không phải ở lương cơ bản — đây là chỗ đúng để công ty nói "ai làm tốt hơn sẽ được đền đáp hơn"
+
+**Bài học cốt lõi:**
+Khi công ty than phiền "người mới tuyển vào không làm được lâu" ở các vị trí middle management trở lên — đừng chỉ nhìn vào năng lực người mới. Luôn hỏi: mức lương người mới so với người cũ cùng cấp độ chênh nhau bao nhiêu? Nếu trên 20-25%, khả năng cao đang có sabotage ngầm từ người cũ, không phải vấn đề năng lực của người mới.
+
+**Pattern nhận biết:**
+- Tuyển liên tục ở một cấp độ, người mới đều "không làm được lâu" → kiểm tra pay compression trước khi kết luận về năng lực
+- Người cũ "để việc cho người mới làm" nhưng không support → dấu hiệu silent sabotage, thường gắn với bất mãn về compensation
+- Công ty trả lương "theo giá thị trường lúc tuyển" mà không có baseline nội bộ rõ ràng → core problem, sẽ tiếp tục lặp lại nếu không fix
+
+
+---
+
+### CASE 5 — Centralize grade structure sau M&A giữa 2 ngành hoàn toàn khác nhau
+
+**Bối cảnh:**
+Công ty F&B được sáp nhập vào một tập đoàn tài chính. Hai bên có hệ thống cấp bậc nội bộ khác nhau về bản chất — không chỉ khác tên gọi, mà khác cả logic phân cấp (F&B thường có nhiều layer vận hành ở tầng dưới — store manager, area manager, regional — trong khi tài chính có cấu trúc phẳng hơn ở tầng senior nhưng chuyên môn hoá sâu hơn). Pay premium của hai ngành cũng khác nhau hoàn toàn — tài chính thường có premium cao hơn ở cấp trung và cao cấp do tính cạnh tranh thị trường lao động ngành này.
+
+**Yêu cầu khách hàng:**
+Tập đoàn muốn centralize lại thành một hệ thống HR grade chung cho toàn tập đoàn — để dễ quản lý, dễ so sánh, dễ luân chuyển nhân sự giữa các business unit.
+
+**Vấn đề kỹ thuật thực sự:**
+Để centralize được hai ngành hoàn toàn khác nhau vào một grade system chung, grade chung đó buộc phải **rộng** — một grade chung phải chứa được sự đa dạng về vai trò và độ phức tạp của cả hai ngành. Hệ quả: ở business F&B, mỗi grade chung khi áp vào sẽ tự nhiên bị **phân mảnh nhỏ hơn** thành nhiều sub-level — vì F&B vốn có nhiều tầng vận hành chi tiết hơn so với độ "rộng" của một grade chung được thiết kế để vừa cả hai ngành.
+
+**Nguyên tắc giải quyết — tách biệt grade chung và pay practice riêng theo ngành:**
+
+Một hệ thống grade chung (job architecture chung) là cần thiết và đúng đắn cho mục đích quản trị — nhưng **không có nghĩa là một mức lương chung (common pay level).**
+
+- Grade chung dùng để: so sánh độ phức tạp/trách nhiệm của vai trò xuyên suốt tập đoàn, tạo career path xuyên business unit, chuẩn hoá ngôn ngữ tổ chức
+- Pay practice vẫn cần khác nhau theo peer group thực tế của từng ngành — không thể áp cùng một mức lương cho cùng một grade nếu hai ngành có market rate hoàn toàn khác nhau
+
+**Cơ chế cụ thể đã áp dụng:**
+- Xây một khung lương chung (common pay framework) cho toàn tập đoàn — nhưng bên trong khung đó, áp dụng **premium khác nhau tuỳ theo ngành**
+- Mức premium được điều chỉnh dựa trên kết quả kinh doanh thực tế của từng business unit trong 3 năm gần nhất — nghĩa là premium không cố định vĩnh viễn, mà phản ánh business performance, tạo động lực đúng cho cả hai bên
+
+**Tại sao cách này đúng:**
+Nếu ép cả hai ngành vào cùng một mức lương theo grade chung — tài chính sẽ mất người vì lương dưới market, hoặc F&B sẽ overpay so với market của chính ngành đó, làm hỏng cost structure. Tách biệt "cấu trúc tổ chức chung" (grade) và "thực tiễn trả lương theo ngành" (pay practice) cho phép vừa có một ngôn ngữ tổ chức thống nhất, vừa giữ được tính cạnh tranh thị trường của từng ngành.
+
+**Bài học cốt lõi:**
+Khi khách hàng yêu cầu "centralize grade system" sau M&A hoặc sáp nhập đa ngành — đừng hiểu nhầm đây là yêu cầu "một mức lương cho tất cả." Phân biệt rõ hai khái niệm: **job architecture/grade** (công cụ quản trị, nên thống nhất) và **pay level/peer group** (phải phản ánh thị trường thực tế của từng ngành, không thể thống nhất một cách máy móc).
+
+**Pattern nhận biết:**
+- Tập đoàn đa ngành muốn "một hệ thống grade chung" → hỏi ngay: mục đích là quản trị tổ chức hay là đồng nhất lương? Hai mục đích cần giải pháp khác nhau
+- Hai business unit có market rate khác xa nhau nhưng bị ép vào cùng pay range → sẽ mất người ở ngành có market rate cao, hoặc overpay ở ngành có market rate thấp
+- Grade chung được thiết kế quá hẹp (copy nguyên logic của một ngành) → sẽ không chứa được sự đa dạng của ngành còn lại, gây méo mó khi áp dụng
+- Premium theo business performance, không cố định → tạo cơ chế công bằng động, phản ánh đúng đóng góp thực tế của từng đơn vị theo thời gian
+
+`;
+
+function buildSystemPrompt() {
+  const isVi=lang==='vi';
+  const languageInstruction = isVi
+    ? 'NGÔN NGỮ: Trả lời hoàn toàn bằng tiếng Việt trong toàn bộ cuộc trò chuyện.'
+    : 'LANGUAGE: Respond entirely in English throughout the conversation.';
+
+  const jsonFormat = `
+LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng chính xác này:
+<JSON>
+{
+  "phase": 0,
+  "message": "Nội dung trả lời hội thoại của bạn ở đây",
+  "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
+  "evidence": [{"text": "mô tả bằng chứng", "strength": "strong|moderate|weak|none"}],
+  "flags": [],
+  "memoReady": false,
+  "memo": null
+}
+</JSON>
+
+causes: tỷ lệ phần trăm phải cộng lại bằng 100 khi có đủ thông tin. Nếu chưa đủ, để tất cả là 0.
+evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trước đó.
+flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner").
+memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).
+memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Điều KHÔNG nên làm, Rủi ro, Kế hoạch hành động 30 ngày.
+
+Trường "message" là những gì người dùng thấy. Hãy rõ ràng, trực tiếp, như một cố vấn có 20 năm kinh nghiệm. Không nói xã giao thừa thãi. Ngắn gọn nhưng đầy đủ. Đừng vội vàng chuyển sang Giai đoạn 3 trước khi thu thập đủ thông tin qua ít nhất 3-4 câu hỏi chẩn đoán.
+
+Giai đoạn hiện tại trong cuộc hội thoại: ${currentPhase}`;
+
+  return PROPRIETARY_KNOWLEDGE + '\n\n---\n\n' + languageInstruction + '\n' + jsonFormat;
+}
+
+// ─── PARSE ─────────────────────────────────────────────────────
+function parseAIResponse(raw) {
+  try {
+    const match=raw.match(/<JSON>([\s\S]*?)<\/JSON>/);
+    if(match) return JSON.parse(match[1].trim());
+  } catch(e){console.warn('JSON parse failed',e);}
+  return {message:raw,phase:currentPhase,causes:null,evidence:[],memoReady:false,memo:null};
+}
+
+// ─── MEMO ──────────────────────────────────────────────────────
+function showMemo(){
+  if(!memoReady||!diagnosisData.memoContent) return;
+  document.getElementById('memo-content').innerHTML=diagnosisData.memoContent;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeMemo(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeMemoOnBg(e){if(e.target===document.getElementById('modal-overlay'))closeMemo();}
+function copyMemo(){
+  const text=document.getElementById('memo-content').innerText;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('modal-btn-copy');
+    btn.textContent=T[lang].copied;
+    setTimeout(()=>btn.textContent=T[lang].modalCopy,2000);
+  });
+}
+
+// ─── RESET ─────────────────────────────────────────────────────
+function resetUIOnly() {
+  const t=T[lang];
+  document.getElementById('chat-messages').innerHTML=`
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#C0392B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="empty-title" id="empty-title">${t.emptyTitle}</div>
+      <div class="empty-sub" id="empty-sub">${t.emptySub}</div>
+    </div>`;
+  document.getElementById('starters').style.display='flex';
+  document.getElementById('causes-pending').style.display='block';
+  document.getElementById('causes-bars').style.display='none';
+  clearEvidence();
+  document.getElementById('memo-btn').disabled=true;
+  document.getElementById('save-btn').classList.remove('visible');
+  const exportBtn = document.getElementById('export-btn');
+  if (exportBtn) exportBtn.style.display = 'none';
+  setPhase(0);
+  [1,2,3,4,5,6].forEach(i=>{
+    document.getElementById(`cb-${i}`).style.width='0%';
+    document.getElementById(`cp-${i}`).textContent='0%';
+  });
+}
+
+function resetConversation() {
+  messages=[]; currentPhase=0; memoReady=false; currentCaseId=null;
+  diagnosisData={causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0},evidence:[],memoContent:null,problemStatement:''};
+  resetUIOnly();
+  if(sidebarOpen) {
+    document.querySelectorAll('.case-item').forEach(el=>el.classList.remove('active'));
+  }
+}
+
+// ─── INPUT ─────────────────────────────────────────────────────
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+function useStarter(el){document.getElementById('chat-input').value=el.textContent;sendMessage();}
+
+// Init
+applyTranslations();
+</script>
+</body>
+</html>
