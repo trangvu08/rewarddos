@@ -674,7 +674,7 @@ function exportConversation() {
     if (m.role === 'user') {
       lines.push('[CEO/HR]: ' + m.content);
     } else {
-      const cleanMsg = m.content.replace(/<JSON>[\s\S]*?<\/JSON>/g, '').trim();
+      const cleanMsg = m.content.replace(/<MEMO>[\s\S]*?<\/MEMO>/g, '').replace(/<JSON>[\s\S]*?<\/JSON>/g, '').trim();
       if (cleanMsg) lines.push('[AI]: ' + cleanMsg);
     }
     lines.push('');
@@ -772,7 +772,7 @@ async function loadCase(id) {
     const visible = messages.slice(-40);
     visible.forEach(m => {
       // raw content — strip JSON block before display
-      const display = m.content.replace(/<JSON>[\s\S]*?<\/JSON>/g,'').trim();
+      const display = m.content.replace(/<MEMO>[\s\S]*?<\/MEMO>/g,'').replace(/<JSON>[\s\S]*?<\/JSON>/g,'').trim();
       if (display) addMessage(m.role, display, true);
     });
 
@@ -938,7 +938,7 @@ async function sendMessage() {
   try {
     const resp=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({max_tokens:4000,system:buildSystemPrompt(),messages})
+      body:JSON.stringify({max_tokens:6000,system:buildSystemPrompt(),messages})
     });
 
     if (resp.status === 429) {
@@ -967,8 +967,9 @@ async function sendMessage() {
     if(parsed.evidence) parsed.evidence.forEach(e=>addEvidence(e.text,e.strength));
     if(parsed.memoReady){
       memoReady=true;
-      document.getElementById('memo-btn').disabled=false;
       diagnosisData.memoContent=parsed.memo;
+      // Only enable the memo button when we actually have memo HTML to show.
+      if(parsed.memo) document.getElementById('memo-btn').disabled=false;
       setPhase(4);
     }
   } catch(err) {
@@ -1171,8 +1172,10 @@ Generate a one-page CEO decision memo with:
 
 ---
 
-## JSON OUTPUT FORMAT
+## OUTPUT FORMAT
 ### (Always append this to every response)
+
+Append a small JSON block. When memoReady is true, ALSO append a SEPARATE <MEMO> block AFTER the JSON containing the full HTML memo.
 
 <JSON>
 {
@@ -1181,8 +1184,7 @@ Generate a one-page CEO decision memo with:
   "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
   "evidence": [{"text": "evidence description", "strength": "strong|moderate|weak|none"}],
   "flags": [],
-  "memoReady": false,
-  "memo": null
+  "memoReady": false
 }
 </JSON>
 
@@ -1191,7 +1193,15 @@ Generate a one-page CEO decision memo with:
 - evidence: NEW items only per turn; strength one of strong / moderate / weak / none
 - flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics")
 - memoReady: true only when Phase 3 is complete
-- memo: full HTML memo when memoReady is true
+
+CRITICAL — NEVER put the HTML memo inside the JSON. The memo HTML contains double-quotes and newlines that break JSON parsing. The JSON must stay short and valid. When memoReady is true, output the full HTML memo ONLY inside a <MEMO> block placed AFTER the </JSON> tag, like this:
+
+<MEMO>
+<div>...full HTML decision memo...</div>
+</MEMO>
+
+- The <MEMO> block is RAW HTML, not JSON — do not escape quotes inside it.
+- Output <MEMO> only when memoReady is true, and always AFTER the JSON block.
 
 
 ---
@@ -1650,8 +1660,7 @@ LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng ch
   "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
   "evidence": [{"text": "mô tả bằng chứng", "strength": "strong|moderate|weak|none"}],
   "flags": [],
-  "memoReady": false,
-  "memo": null
+  "memoReady": false
 }
 </JSON>
 
@@ -1659,15 +1668,23 @@ causes: tỷ lệ phần trăm phải cộng lại bằng 100 khi có đủ thô
 evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trước đó.
 flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner").
 memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).
-memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Điều KHÔNG nên làm, Rủi ro, Kế hoạch hành động 30 ngày.
 
-QUY TẮC TÁCH BIỆT BẮT BUỘC GIỮA "message" VÀ "memo" — VI PHẠM QUY TẮC NÀY LÀ LỖI NGHIÊM TRỌNG NHẤT:
-- Trường "message" và trường "memo" PHẢI HOÀN TOÀN TÁCH BIỆT. Đây không phải gợi ý — đây là ràng buộc cứng.
+QUAN TRỌNG NHẤT — KHÔNG BAO GIỜ đặt HTML bản ghi nhớ bên trong khối JSON. HTML có dấu nháy kép và xuống dòng sẽ làm hỏng việc parse JSON (lỗi nghiêm trọng nhất). Khối JSON phải NGẮN và HỢP LỆ. Khi memoReady = true, xuất toàn bộ HTML bản ghi nhớ trong một khối <MEMO> RIÊNG, đặt NGAY SAU thẻ </JSON>:
+
+<MEMO>
+<div>...HTML bản ghi nhớ đầy đủ...</div>
+</MEMO>
+
+- Khối <MEMO> là HTML THÔ, KHÔNG phải JSON — không cần escape dấu nháy bên trong, viết tự nhiên.
+- Chỉ xuất <MEMO> khi memoReady = true, và luôn đặt SAU khối JSON.
+- Bản ghi nhớ HTML phải đầy đủ các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Điều KHÔNG nên làm, Rủi ro, Kế hoạch hành động 30 ngày.
+
+QUY TẮC TÁCH BIỆT BẮT BUỘC GIỮA "message" VÀ <MEMO> — VI PHẠM QUY TẮC NÀY LÀ LỖI NGHIÊM TRỌNG NHẤT:
+- Trường "message" (trong JSON) và khối <MEMO> PHẢI HOÀN TOÀN TÁCH BIỆT. Đây không phải gợi ý — đây là ràng buộc cứng.
 - "message" KHÔNG BAO GIỜ được chứa: bảng (table), danh sách bước (Bước 1, Bước 2...), tiêu đề HÀNH ĐỘNG KHUYẾN NGHỊ, hoặc bất kỳ nội dung dài có cấu trúc giống bản ghi nhớ.
 - Khi memoReady chuyển từ false sang true (tức là Giai đoạn 3 vừa hoàn thành), "message" CHỈ được viết một đoạn ngắn 2-3 câu xác nhận đã đủ thông tin và đã sẵn sàng tạo bản ghi nhớ — ví dụ: "Tôi đã có đủ thông tin để đưa ra khuyến nghị. Dựa trên bằng chứng, vấn đề chính là [tóm tắt 1 câu]. Bấm nút 'Tạo Bản Ghi Nhớ Quyết Định' để xem đầy đủ phân tích và kế hoạch hành động."
-- TOÀN BỘ nội dung dài — bảng đánh giá nguyên nhân, danh sách bằng chứng chi tiết, các bước khuyến nghị theo thứ tự, kế hoạch 30 ngày — chỉ được viết trong trường "memo" dưới dạng HTML, KHÔNG ĐƯỢC viết lại hoặc lặp lại trong "message".
-- Nếu bạn thấy "message" đang dài hơn 4-5 câu hoặc có định dạng bảng/danh sách số thứ tự dài — đây là dấu hiệu bạn đang nhồi nhầm nội dung memo vào message. Dừng lại, cắt ngắn message, chuyển toàn bộ nội dung chi tiết sang field memo.
-- Lý do bắt buộc: message bị giới hạn độ dài hiển thị và token, nội dung dài bị nhồi vào đó sẽ bị cắt cụt giữa câu, gây lỗi hiển thị nghiêm trọng cho người dùng.
+- TOÀN BỘ nội dung dài — bảng đánh giá nguyên nhân, danh sách bằng chứng chi tiết, các bước khuyến nghị theo thứ tự, kế hoạch 30 ngày — chỉ được viết trong khối <MEMO> dưới dạng HTML, KHÔNG ĐƯỢC viết lại hoặc lặp lại trong "message".
+- Nếu bạn thấy "message" đang dài hơn 4-5 câu hoặc có định dạng bảng/danh sách số thứ tự dài — đây là dấu hiệu bạn đang nhồi nhầm nội dung memo vào message. Dừng lại, cắt ngắn message, chuyển toàn bộ nội dung chi tiết sang khối <MEMO>.
 
 Trường "message" là những gì người dùng thấy. Hãy rõ ràng, trực tiếp, như một cố vấn có 20 năm kinh nghiệm. Ngắn gọn nhưng đầy đủ.
 
@@ -1687,11 +1704,41 @@ Giai đoạn hiện tại trong cuộc hội thoại: ${currentPhase}`;
 
 // ─── PARSE ─────────────────────────────────────────────────────
 function parseAIResponse(raw) {
-  try {
-    const match=raw.match(/<JSON>([\s\S]*?)<\/JSON>/);
-    if(match) return JSON.parse(match[1].trim());
-  } catch(e){console.warn('JSON parse failed',e);}
-  return {message:raw,phase:currentPhase,causes:null,evidence:[],memoReady:false,memo:null};
+  const result = {message:'',phase:currentPhase,causes:null,evidence:[],memoReady:false,memo:null};
+
+  // Memo lives OUTSIDE the JSON as raw HTML so its quotes/newlines can't break JSON parsing.
+  const memoMatch = raw.match(/<MEMO>([\s\S]*?)<\/MEMO>/);
+  if (memoMatch) result.memo = memoMatch[1].trim();
+
+  const jsonMatch = raw.match(/<JSON>([\s\S]*?)<\/JSON>/);
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[1].trim());
+      Object.assign(result, parsed);
+      // Prefer the <MEMO> block; only fall back to a legacy in-JSON memo field if present.
+      if (memoMatch) result.memo = memoMatch[1].trim();
+    } catch(e) {
+      // Lenient recovery: pull individual fields without a full parse, so a single
+      // unescaped char in the JSON never dumps the raw payload into the chat bubble.
+      console.warn('JSON parse failed, using lenient extraction', e);
+      const j = jsonMatch[1];
+      const grab = (k) => {
+        const m = j.match(new RegExp('"'+k+'"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"'));
+        try { return m ? JSON.parse('"'+m[1]+'"') : null; } catch(_) { return m ? m[1] : null; }
+      };
+      result.message = grab('message') || '';
+      const ph = j.match(/"phase"\s*:\s*(\d)/);        if(ph) result.phase = +ph[1];
+      const mr = j.match(/"memoReady"\s*:\s*(true|false)/); if(mr) result.memoReady = mr[1]==='true';
+      const cm = j.match(/"causes"\s*:\s*(\{[^}]*\})/);     if(cm){ try{ result.causes = JSON.parse(cm[1]); }catch(_){} }
+    }
+  }
+
+  // Last-resort: never leave message empty — show the response minus the machine blocks.
+  if (!result.message) {
+    result.message = raw.replace(/<MEMO>[\s\S]*?<\/MEMO>/g,'')
+                        .replace(/<JSON>[\s\S]*?<\/JSON>/g,'').trim();
+  }
+  return result;
 }
 
 // ─── MEMO ──────────────────────────────────────────────────────
