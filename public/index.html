@@ -1740,6 +1740,20 @@ QUY TẮC BẮT BUỘC VỀ "ĐÓNG BĂNG LƯƠNG" TRONG KHUYẾN NGHỊ:
 QUY TẮC VỀ TIMELINE KẾ HOẠCH HÀNH ĐỘNG:
 - Kế hoạch hành động mặc định là 90 ngày, không phải 30 ngày, trừ khi tình huống thực sự đơn giản (công ty dưới 100 người, vấn đề khu trú ở 1-2 vị trí).
 - Trong 90 ngày, 30 ngày đầu CHỈ nên là giai đoạn "chẩn đoán và thiết kế quy trình" (thu thập dữ liệu, chọn phương pháp job evaluation, thống nhất nguyên tắc approval) — KHÔNG được viết kế hoạch kiểu "tuần 2-3 đã hoàn thành job evaluation" vì không khả thi.
+
+QUY TẮC BẮT BUỘC: ƯỚC TÍNH TÁC ĐỘNG (ESTIMATED IMPACT) TRONG KẾ HOẠCH HÀNH ĐỘNG
+
+Bảng Kế hoạch hành động 90 ngày trong memo PHẢI có thêm một cột "Tác động kỳ vọng" bên cạnh các cột Thời gian / Hành động / Người chịu trách nhiệm hiện có. Cấu trúc bảng đầy đủ: Thời gian | Hành động | Người chịu trách nhiệm | Tác động kỳ vọng.
+
+Nội dung cột "Tác động kỳ vọng" phải dựa trên bằng chứng và chẩn đoán đã thu thập trong case này — không được viết chung chung kiểu "cải thiện tình hình". Ví dụ cách viết đúng:
+- "Xác định được số lượng vị trí có pay gap >20% — ước tính 15-25% trong tổng số vị trí Manager dựa trên dải lương 30-120tr đã quan sát"
+- "Giảm thời gian CEO phải approve từng ca lương cá nhân — từ xử lý ~100% các ca hiện tại xuống dưới 20% (chỉ ngoại lệ), dựa trên việc 200 người với tốc độ tăng 10%/năm sẽ tạo quá tải nếu duy trì cơ chế cũ"
+- "Kỳ vọng giảm tỷ lệ nghỉ việc của nhân viên mới dưới 1 năm — hiện đang rải đều toàn công ty, sau khi sửa pay governance và onboarding nên giảm xuống dưới mức trung bình ngành (cần benchmark cụ thể nếu có)"
+
+Nếu không đủ dữ liệu để ước tính con số cụ thể, BẮT BUỘC ít nhất phải nêu hướng thay đổi định tính rõ ràng (tăng/giảm cái gì, so với baseline nào) — không được để trống cột này hoặc viết mơ hồ không gắn với case cụ thể.
+
+Cột Tác động kỳ vọng phải nhất quán với phần "Chẩn đoán nguyên nhân gốc rễ" — nếu chẩn đoán nói 55% là internal equity, thì các hành động liên quan đến job evaluation/pay range phải có impact ước tính lớn nhất, phản ánh đúng trọng số nguyên nhân.
+
 - GIỮ HTML GỌN để tránh bị cắt cụt giữa chừng: dùng inline CSS tối thiểu (KHÔNG lặp lại style dài trên từng ô bảng — gom vào <style> ở đầu hoặc dùng class ngắn), nội dung súc tích đi thẳng vào điểm chính. Mục tiêu toàn bộ khối <MEMO> dưới ~3000 từ. PHẢI viết xong và đóng thẻ </MEMO> — không để memo dở dang.
 
 QUY TẮC TÁCH BIỆT BẮT BUỘC GIỮA "message" VÀ <MEMO> — VI PHẠM QUY TẮC NÀY LÀ LỖI NGHIÊM TRỌNG NHẤT:
