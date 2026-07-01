@@ -944,7 +944,7 @@ async function callAIAndHandle(retryCount) {
   try {
     const resp=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({max_tokens:8000,system:buildSystemPrompt(),messages})
+      body:JSON.stringify({max_tokens:12000,system:buildSystemPrompt(),messages})
     });
 
     if (resp.status === 429) {
@@ -1897,9 +1897,12 @@ function parseAIResponse(raw) {
 }
 
 // ─── MEMO ──────────────────────────────────────────────────────
-function showMemo(){
-  if(!memoReady||!diagnosisData.memoContent) return;
-  document.getElementById('memo-content').innerHTML=diagnosisData.memoContent;
+function showMemo() {
+  if (!memoReady) return;
+  const content = diagnosisData.memoContent;
+  document.getElementById('memo-content').innerHTML = content
+    ? content
+    : '<div style="padding:20px;color:#C0392B;font-family:sans-serif;">⚠️ Bản ghi nhớ chưa được tạo đầy đủ. Vui lòng gửi thêm tin nhắn "Tạo lại bản ghi nhớ" để thử lại.</div>';
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeMemo(){document.getElementById('modal-overlay').classList.remove('open');}
