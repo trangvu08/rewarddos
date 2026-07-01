@@ -2097,7 +2097,9 @@ const MEMO_STYLE = `<style id="memo-print-style">
 .memo-tags { display: flex; flex-wrap: wrap; gap: 20px; }
 .memo-tag { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 500; color: #666666; }
 .memo-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #C9A84C; }
-.memo-body-grid { padding: 32px 48px 80px; display: grid; grid-template-columns: 1fr 200px; gap: 36px; }
+.memo-body-grid { padding: 32px 48px 80px; display: block; }
+.memo-body-top { display: grid; grid-template-columns: 1fr 200px; gap: 36px; margin-bottom: 28px; }
+.memo-section-fullwidth { grid-column: 1 / -1; }
 .memo-section { margin-bottom: 28px; }
 .memo-section-label { font-size: 7px; font-weight: 600; letter-spacing: 2.5px; color: #C9A84C; text-transform: uppercase; padding-bottom: 8px; border-bottom: 0.5px solid #e8d9b0; margin-bottom: 10px; }
 .memo-section-text { font-size: 11px; line-height: 1.8; color: #333333; }
@@ -2106,6 +2108,12 @@ const MEMO_STYLE = `<style id="memo-print-style">
 .memo-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 8px; }
 .memo-table th { font-size: 7px; font-weight: 600; letter-spacing: 1.5px; color: #999999; text-transform: uppercase; padding: 6px 8px; text-align: left; border-bottom: 0.5px solid #e5e5e5; }
 .memo-table td { padding: 7px 8px; color: #333333; border-bottom: 0.5px solid #f0f0f0; vertical-align: top; line-height: 1.5; }
+.memo-table { table-layout: fixed; width: 100%; }
+.memo-table th:nth-child(1), .memo-table td:nth-child(1) { width: 35%; }
+.memo-table th:nth-child(2), .memo-table td:nth-child(2) { width: 15%; }
+.memo-table th:nth-child(3), .memo-table td:nth-child(3) { width: 25%; }
+.memo-table th:nth-child(4), .memo-table td:nth-child(4) { width: 25%; }
+.memo-table td { word-wrap: break-word; overflow-wrap: break-word; }
 .badge-high { display: inline-block; padding: 2px 7px; background: #1a1a1a; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
 .badge-moderate { display: inline-block; padding: 2px 7px; background: #C9A84C; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
 .badge-low { display: inline-block; padding: 2px 7px; background: #e5e5e5; color: #666666; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
@@ -2192,6 +2200,28 @@ function buildMemoSidebar() {
   return html;
 }
 
+// Split processed memo HTML at the 3rd top-level heading: first 2 sections
+// (Vấn đề + Quyết định) go in the grid top next to the sidebar; the rest
+// (Bằng chứng, Chẩn đoán, Khuyến nghị...) render full-width below.
+function splitMemoTop(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  let root = tmp;
+  while (root.children.length === 1 && root.firstElementChild.tagName === 'DIV') {
+    root = root.firstElementChild;
+  }
+  const nodes = Array.from(root.childNodes);
+  const isH = (n, lv) => n.nodeType === 1 && new RegExp('^H[' + lv + ']$').test(n.tagName);
+  const levels = nodes.filter(n => isH(n, '12')).length >= 3 ? '12' : '123';
+  let hc = 0, splitIdx = nodes.length;
+  for (let i = 0; i < nodes.length; i++) {
+    if (isH(nodes[i], levels)) { hc++; if (hc === 3) { splitIdx = i; break; } }
+  }
+  const top = document.createElement('div'), rest = document.createElement('div');
+  nodes.forEach((n, i) => { (i < splitIdx ? top : rest).appendChild(n.cloneNode(true)); });
+  return { top: top.innerHTML, rest: rest.innerHTML };
+}
+
 function showMemo() {
   if (!memoReady) return;
   const overlay = document.getElementById('modal-overlay');
@@ -2215,6 +2245,7 @@ function showMemo() {
   tags.push('Ngày: ' + date);
   tags.push('Mật — Ban Điều Hành');
   const tagsHtml = tags.map(x => `<div class="memo-tag"><span class="memo-tag-dot"></span>${escHtml(x)}</div>`).join('');
+  const split = splitMemoTop(processMemoHtml(raw));
 
   box.style.padding = '0';
   box.innerHTML = MEMO_STYLE +
@@ -2230,8 +2261,13 @@ function showMemo() {
         '<div class="memo-main-title">' + escHtml(title) + '</div>' +
         '<div class="memo-tags">' + tagsHtml + '</div>' +
       '</div>' +
-      '<div class="memo-body-grid"><div class="memo-main">' + processMemoHtml(raw) + '</div>' +
-        '<div class="memo-sidebar">' + buildMemoSidebar() + '</div></div>' +
+      '<div class="memo-body-grid">' +
+        '<div class="memo-body-top">' +
+          '<div class="memo-main">' + split.top + '</div>' +
+          '<div class="memo-sidebar">' + buildMemoSidebar() + '</div>' +
+        '</div>' +
+        (split.rest ? '<div class="memo-main memo-section-fullwidth">' + split.rest + '</div>' : '') +
+      '</div>' +
       '<div class="memo-footer"><div class="memo-footer-left">Rewards Decision OS — Clarity Intelligence © 2025</div>' +
         '<div class="memo-footer-page">01</div><div class="memo-footer-right">Mật — Chỉ dành cho Ban Điều Hành</div></div>' +
     '</div>' +
