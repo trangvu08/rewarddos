@@ -230,7 +230,8 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 2px;
   }
-  .msg.ai   .msg-avatar { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .msg.ai   .msg-avatar { background: none; border: none; border-radius: 0; width: 48px; height: 48px; }
+  .msg.ai   .msg-avatar svg { width: 48px; height: 48px; display: block; }
   .msg.user .msg-avatar { background: var(--card-mid); color: var(--cream-dim); }
 
   .msg-bubble { padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.7; }
@@ -887,6 +888,14 @@ function clearEvidence() {
 }
 
 // ─── CHAT ──────────────────────────────────────────────────────
+const AI_AVATAR_SVG = `<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <line x1="18" y1="8" x2="18" y2="20" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="30" y1="8" x2="30" y2="20" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="25" cy="14" r="3.5" fill="#1a1a1a"/>
+  <text x="24" y="32" font-family="'Be Vietnam Pro', sans-serif" font-size="7" font-weight="700" letter-spacing="2" fill="#1a1a1a" text-anchor="middle">CLARITY</text>
+  <text x="24" y="41" font-family="'Be Vietnam Pro', sans-serif" font-size="4.5" font-weight="400" letter-spacing="1.5" fill="#666" text-anchor="middle">INTELLIGENCE</text>
+</svg>`;
+
 function addMessage(role, content, skipPush) {
   const container=document.getElementById('chat-messages');
   const emptyState=document.getElementById('empty-state');
@@ -897,7 +906,8 @@ function addMessage(role, content, skipPush) {
   const msg=document.createElement('div');
   msg.className=`msg ${role==='user'?'user':'ai'}`;
   const avatar=document.createElement('div');
-  avatar.className='msg-avatar'; avatar.textContent=role==='user'?'U':'AI';
+  avatar.className='msg-avatar';
+  if(role==='user'){ avatar.textContent='U'; } else { avatar.innerHTML=AI_AVATAR_SVG; }
   const bubble=document.createElement('div');
   bubble.className='msg-bubble'; bubble.innerHTML=formatMsg(content);
   msg.appendChild(avatar); msg.appendChild(bubble);
@@ -920,7 +930,7 @@ function showTyping() {
   const c=document.getElementById('chat-messages');
   const el=document.createElement('div');
   el.className='msg ai'; el.id='typing-indicator';
-  el.innerHTML=`<div class="msg-avatar">AI</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  el.innerHTML=`<div class="msg-avatar">${AI_AVATAR_SVG}</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
   c.appendChild(el); c.scrollTop=c.scrollHeight;
 }
 function removeTyping(){const el=document.getElementById('typing-indicator');if(el)el.remove();}
@@ -1221,6 +1231,22 @@ Generate a one-page CEO decision memo with:
 - Never recommend grade structure redesign without checking if org design and manager capability are the real issue.
 - Never treat exit interview data at face value in Vietnam — always probe the real reason.
 - Never rush to Phase 3 before you have evidence from at least 3–4 diagnostic questions answered.
+
+### KHI NGUYÊN NHÂN GỐC KHÔNG PHẢI LÀ REWARDS — QUY TẮC BẮT BUỘC
+
+Rewards Decision OS chỉ giải quyết trong domain Rewards. Khi chẩn đoán xác định nguyên nhân gốc là org design, leadership quality, hay strategy — phải làm đúng 2 việc, không được làm thay công việc của org consultant:
+
+VIỆC 1 — NÓI THẲNG ranh giới:
+Trong phần "Nhận định trực tiếp" của memo, phải có một câu tường minh: "Đây không phải vấn đề Rewards — Rewards hiện tại đang được dùng để bù đắp cho vấn đề [X]. Giải quyết Rewards mà không fix [X] trước sẽ không có hiệu quả bền vững."
+Không được đề xuất org design solutions (Authority Matrix, reporting structure, headcount) như là quyết định chính của memo — đó là việc của org consultant, không phải Rewards advisor.
+
+VIỆC 2 — CHỈ RÕ PHẦN REWARDS TRONG BÀI TOÁN:
+Dù org design là nguyên nhân gốc, Rewards vẫn có vai trò cụ thể cần phân tích:
+- Rewards hiện tại đang khuếch đại/củng cố hành vi sai nào? (vd: thưởng sản lượng trong khi muốn khuyến khích sáng kiến → người giỏi không thấy sáng kiến được đền bù)
+- Khi org thay đổi, Rewards cần thay đổi gì theo để hỗ trợ? (vd: nếu trao quyền cho supervisor → bonus criteria cần có thêm tiêu chí về process improvement, không chỉ output)
+- Có tiêu chí Rewards nào đang vô tình punishment người giỏi không? (vd: pay for tenure thay vì pay for contribution → người ở lâu lương cao hơn người đóng góp nhiều hơn)
+
+Ba câu hỏi này BẮT BUỘC phải được trả lời trong memo bất kể nguyên nhân gốc là gì — đây là phần Rewards luôn có thể đóng góp ngay cả khi không phải nguyên nhân chính.
 
 ---
 
@@ -1759,7 +1785,7 @@ QUAN TRỌNG NHẤT — KHÔNG BAO GIỜ đặt HTML bản ghi nhớ bên trong 
 
 - Khối <MEMO> là HTML THÔ, KHÔNG phải JSON — không cần escape dấu nháy bên trong, viết tự nhiên.
 - Chỉ xuất <MEMO> khi memoReady = true, và luôn đặt SAU khối JSON.
-memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Tác động ngân sách, Điều KHÔNG nên làm, Rủi ro, Kế hoạch hành động 90 ngày, Tiêu chí thành công (Success Metrics).
+memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Tác động ngân sách, Điều KHÔNG nên làm, Pre-mortem — Khi nào khuyến nghị này sẽ thất bại?, Rủi ro, Kế hoạch hành động 90 ngày, Tiêu chí thành công (Success Metrics).
 
 QUY TẮC BẮT BUỘC — KHUYẾN NGHỊ PHẢI CÓ CÂY QUYẾT ĐỊNH (DECISION LOGIC):
 
@@ -1770,6 +1796,18 @@ Sau phần "Hành động khuyến nghị" trong memo, PHẢI có một phần n
 - "Nếu [rủi ro C xảy ra] → dừng / điều chỉnh bằng [biện pháp cụ thể]"
 
 Đây không phải kế hoạch dự phòng thông thường — đây là logic của một decision engine: giúp CEO biết KỊCH BẢN NÀO sẽ khiến quyết định hiện tại cần thay đổi, và thay đổi thế nào. Không có phần này, memo chỉ là một consulting report — không phải một hệ thống hỗ trợ ra quyết định.
+
+### QUY TẮC BẮT BUỘC — ECONOMIC REASONING CHO MỖI QUYẾT ĐỊNH
+
+Board không ra quyết định bằng insight — họ ra quyết định bằng economics. Mỗi quyết định trong phần "Hành động khuyến nghị" PHẢI có một dòng economic reasoning sơ bộ theo format:
+
+"Chi phí ước tính: [X] | Lợi ích kỳ vọng: [Y] | Mức độ ưu tiên so với các lựa chọn khác: [lý do ngắn gọn]"
+
+Nếu không có đủ dữ liệu để tính chi phí chính xác, ít nhất phải ước tính:
+- Chi phí của việc KHÔNG làm (vd: "Mỗi supervisor Top Talent nghỉ = chi phí tuyển + onboarding + lost productivity ước tính X tháng lương")
+- So sánh tương đối: quyết định này tốn ít/nhiều hơn đáng kể so với việc tiếp tục tăng lương không có hiệu quả?
+
+Đây là cách biến một insight đúng thành một quyết định có thể bảo vệ trước Board.
 
 QUY TẮC BẮT BUỘC — SUCCESS METRICS (TIÊU CHÍ THÀNH CÔNG):
 
@@ -1785,6 +1823,18 @@ Ví dụ tín hiệu đúng chuẩn (tuỳ case):
 - "Số ca CEO phải approve ngoại lệ lương giảm từ ~100% xuống dưới 20% trong quý tiếp theo"
 
 Nếu không xác định được tín hiệu đo lường được từ dữ liệu đã thu thập trong case này, đây là dấu hiệu chẩn đoán chưa đủ sâu — hãy quay lại hỏi thêm trước khi viết memo.
+
+QUY TẮC BẮT BUỘC — PRE-MORTEM CHO MỖI QUYẾT ĐỊNH CHÍNH:
+
+Với mỗi trong số 3 quyết định được khuyến nghị, PHẢI có một câu trả lời ngắn cho câu hỏi: "Quyết định này sẽ thất bại nếu [điều kiện cụ thể] xảy ra."
+
+Ví dụ đúng chuẩn:
+- "Authority Matrix sẽ thất bại nếu CEO hoặc C-level tiếp tục can thiệp vào vùng tự quyết của supervisor sau sự cố vận hành đầu tiên — phản xạ kiểm soát mạnh hơn cam kết viết trên giấy."
+- "Sandbox Model sẽ thất bại nếu committee mới được thành lập để 'giám sát' sáng kiến — đây là cách phổ biến nhất để biến giải phóng thành kiểm soát mới."
+
+Không được chỉ liệt kê rủi ro chung chung — phải chỉ ra CƠ CHẾ CỤ THỂ khiến quyết định thất bại, để CEO có thể chủ động ngăn chặn trước.
+
+Mục đích: một Decision OS phải tự phản biện trước khi Board làm điều đó. Nếu không có pre-mortem, memo chỉ là danh sách gợi ý — không phải hệ thống hỗ trợ ra quyết định.
 
 QUY TẮC BẮT BUỘC CHO PHẦN "TÁC ĐỘNG NGÂN SÁCH" TRONG MEMO:
 - Phần này phải ước tính ở mức khái quát: chi phí job evaluation (nội bộ hay cần thuê tư vấn), và liệu sau khi có pay range mới có khả năng cần ngân sách điều chỉnh lương (compa-ratio adjustment) cho các vị trí đang dưới range hay không.
