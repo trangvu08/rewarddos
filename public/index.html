@@ -2152,10 +2152,17 @@ const MEMO_STYLE = `<style id="memo-print-style">
 .memo-main strong { color: #1a1a1a; }
 .memo-main table { width: 100%; margin: 8px 0; }
 @media print {
+  html, body { height: auto !important; overflow: visible !important; margin: 0; padding: 0; }
   body * { visibility: hidden; }
   .memo-page, .memo-page * { visibility: visible; }
-  .memo-page { position: absolute; left: 0; top: 0; width: 100%; }
+  .memo-page { position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; box-shadow: none; page-break-inside: auto; }
+  .memo-section { page-break-inside: avoid; }
+  .memo-table tr { page-break-inside: avoid; }
+  .memo-footer { position: relative; page-break-before: avoid; }
   .memo-print-btn { display: none !important; }
+  .memo-modal-close, button { display: none !important; }
+  /* real modal classes in this app (adapted from .memo-modal*) so nothing clips the page */
+  .modal-overlay, .modal, .modal-body { position: static !important; overflow: visible !important; height: auto !important; max-height: none !important; }
 }
 </style>`;
 
@@ -2222,6 +2229,23 @@ function splitMemoTop(html) {
   return { top: top.innerHTML, rest: rest.innerHTML };
 }
 
+function printMemo() {
+  const style = document.createElement('style');
+  style.id = 'print-page-setup';
+  style.innerHTML = `
+    @page {
+      size: A4;
+      margin: 0;
+    }
+  `;
+  document.head.appendChild(style);
+  window.print();
+  setTimeout(() => {
+    const el = document.getElementById('print-page-setup');
+    if (el) el.remove();
+  }, 1000);
+}
+
 function showMemo() {
   if (!memoReady) return;
   const overlay = document.getElementById('modal-overlay');
@@ -2271,7 +2295,7 @@ function showMemo() {
       '<div class="memo-footer"><div class="memo-footer-left">Rewards Decision OS — Clarity Intelligence © 2025</div>' +
         '<div class="memo-footer-page">01</div><div class="memo-footer-right">Mật — Chỉ dành cho Ban Điều Hành</div></div>' +
     '</div>' +
-    '<button class="memo-print-btn" onclick="window.print()" style="position:fixed; bottom:24px; right:24px; background:#1a1a1a; color:#C9A84C; border:none; padding:10px 20px; font-size:11px; font-weight:600; letter-spacing:1.5px; cursor:pointer; z-index:9999;">XUẤT PDF</button>';
+    '<button class="memo-print-btn" onclick="printMemo()" style="position:fixed; bottom:24px; right:24px; background:#1a1a1a; color:#C9A84C; border:none; padding:10px 20px; font-size:11px; font-weight:600; letter-spacing:1.5px; cursor:pointer; z-index:9999;">XUẤT PDF</button>';
   overlay.classList.add('open');
 }
 function closeMemo(){document.getElementById('modal-overlay').classList.remove('open');}
