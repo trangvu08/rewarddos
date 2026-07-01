@@ -2079,13 +2079,164 @@ function parseAIResponse(raw) {
 }
 
 // ─── MEMO ──────────────────────────────────────────────────────
+const MEMO_STYLE = `<style id="memo-print-style">
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+.memo-page { width: 100%; max-width: 794px; margin: 0 auto; background: #ffffff; font-family: 'Inter', sans-serif; color: #1a1a1a; position: relative; }
+.memo-header { background: #1a1a1a; padding: 28px 48px 24px; display: flex; justify-content: space-between; align-items: flex-start; }
+.memo-logo-lines { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.memo-logo-line { width: 2px; height: 18px; background: #ffffff; }
+.memo-logo-dot { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; }
+.memo-logo-clarity { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: #ffffff; }
+.memo-logo-intel { font-size: 7px; font-weight: 400; letter-spacing: 2.5px; color: #888888; margin-top: 1px; }
+.memo-header-meta { text-align: right; font-size: 10px; color: #aaaaaa; line-height: 1.8; }
+.memo-header-meta-label { font-size: 7px; font-weight: 600; letter-spacing: 2px; color: #C9A84C; text-transform: uppercase; margin-bottom: 4px; }
+.memo-gold-line { height: 3px; background: linear-gradient(90deg, #C9A84C 0%, #E8C97A 50%, #C9A84C 100%); }
+.memo-title-block { padding: 32px 48px 28px; border-bottom: 0.5px solid #e5e5e5; }
+.memo-type-label { font-size: 8px; font-weight: 600; letter-spacing: 3px; color: #C9A84C; text-transform: uppercase; margin-bottom: 10px; }
+.memo-main-title { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: #1a1a1a; line-height: 1.3; margin-bottom: 16px; max-width: 560px; }
+.memo-tags { display: flex; flex-wrap: wrap; gap: 20px; }
+.memo-tag { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 500; color: #666666; }
+.memo-tag-dot { width: 5px; height: 5px; border-radius: 50%; background: #C9A84C; }
+.memo-body-grid { padding: 32px 48px 80px; display: grid; grid-template-columns: 1fr 200px; gap: 36px; }
+.memo-section { margin-bottom: 28px; }
+.memo-section-label { font-size: 7px; font-weight: 600; letter-spacing: 2.5px; color: #C9A84C; text-transform: uppercase; padding-bottom: 8px; border-bottom: 0.5px solid #e8d9b0; margin-bottom: 10px; }
+.memo-section-text { font-size: 11px; line-height: 1.8; color: #333333; }
+.memo-direct-statement { margin: 12px 0; padding: 12px 16px; border-left: 3px solid #C9A84C; background: #fdf9f0; }
+.memo-direct-statement p { font-size: 11px; font-style: italic; line-height: 1.7; color: #1a1a1a; }
+.memo-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 8px; }
+.memo-table th { font-size: 7px; font-weight: 600; letter-spacing: 1.5px; color: #999999; text-transform: uppercase; padding: 6px 8px; text-align: left; border-bottom: 0.5px solid #e5e5e5; }
+.memo-table td { padding: 7px 8px; color: #333333; border-bottom: 0.5px solid #f0f0f0; vertical-align: top; line-height: 1.5; }
+.badge-high { display: inline-block; padding: 2px 7px; background: #1a1a1a; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
+.badge-moderate { display: inline-block; padding: 2px 7px; background: #C9A84C; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
+.badge-low { display: inline-block; padding: 2px 7px; background: #e5e5e5; color: #666666; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
+.sidebar-dark { background: #1a1a1a; padding: 18px; margin-bottom: 14px; }
+.sidebar-light { background: #f8f6f1; border: 0.5px solid #e8d9b0; padding: 18px; margin-bottom: 14px; }
+.sidebar-label { font-size: 7px; font-weight: 600; letter-spacing: 2px; color: #C9A84C; text-transform: uppercase; margin-bottom: 10px; }
+.sidebar-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid #333333; }
+.sidebar-dark .sidebar-row { border-bottom-color: #333333; }
+.sidebar-light .sidebar-row { border-bottom-color: #e8d9b0; }
+.sidebar-row:last-child { border-bottom: none; }
+.sidebar-row-name { font-size: 9px; color: #aaaaaa; }
+.sidebar-dark .sidebar-row-name { color: #aaaaaa; }
+.sidebar-light .sidebar-row-name { color: #666666; }
+.sidebar-row-val { font-size: 9px; font-weight: 600; color: #ffffff; }
+.sidebar-light .sidebar-row-val { color: #1a1a1a; }
+.sidebar-flag { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; border-bottom: 0.5px solid #e8d9b0; font-size: 9px; color: #333333; line-height: 1.5; }
+.sidebar-flag:last-child { border-bottom: none; }
+.sidebar-flag-dot { width: 4px; height: 4px; border-radius: 50%; background: #C9A84C; margin-top: 4px; flex-shrink: 0; }
+.memo-action-item { padding: 10px 0; border-bottom: 0.5px solid #f0f0f0; }
+.memo-action-item:last-child { border-bottom: none; }
+.memo-action-num { font-size: 7px; font-weight: 600; letter-spacing: 1px; color: #C9A84C; margin-bottom: 3px; }
+.memo-action-title { font-size: 10.5px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+.memo-action-text { font-size: 10px; line-height: 1.6; color: #555555; }
+.memo-premortem { margin-top: 6px; padding: 6px 10px; background: #fff8f0; border-left: 2px solid #C9A84C; font-size: 9.5px; color: #666666; font-style: italic; line-height: 1.5; }
+.memo-footer { border-top: 3px solid transparent; border-image: linear-gradient(90deg, #C9A84C 0%, #E8C97A 50%, #C9A84C 100%) 1; background: #1a1a1a; padding: 12px 48px; display: flex; justify-content: space-between; align-items: center; }
+.memo-footer-left { font-size: 8px; color: #666666; letter-spacing: 0.5px; }
+.memo-footer-page { font-size: 8px; color: #C9A84C; font-weight: 600; }
+.memo-footer-right { font-size: 8px; color: #666666; letter-spacing: 0.5px; }
+/* supplement: free-form AI memo content adopts the template look after inline styles are stripped */
+.memo-main h1, .memo-main h2 { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 22px 0 8px; padding-bottom: 6px; border-bottom: 0.5px solid #e8d9b0; }
+.memo-main h1:first-child, .memo-main h2:first-child { margin-top: 0; }
+.memo-main h3, .memo-main h4 { font-size: 11px; font-weight: 600; color: #1a1a1a; margin: 14px 0 6px; }
+.memo-main p { font-size: 11px; line-height: 1.8; color: #333333; margin: 6px 0; }
+.memo-main ul, .memo-main ol { margin: 6px 0 6px 18px; padding: 0; }
+.memo-main li { font-size: 11px; line-height: 1.7; color: #333333; margin: 3px 0; }
+.memo-main strong { color: #1a1a1a; }
+.memo-main table { width: 100%; margin: 8px 0; }
+@media print {
+  body * { visibility: hidden; }
+  .memo-page, .memo-page * { visibility: visible; }
+  .memo-page { position: absolute; left: 0; top: 0; width: 100%; }
+  .memo-print-btn { display: none !important; }
+}
+</style>`;
+
+// Wrap the AI's raw memo HTML: strip its inline styles so the template CSS applies,
+// tag tables, and turn confidence words into badges.
+function processMemoHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('style').forEach(s => s.remove());
+  tmp.querySelectorAll('[style]').forEach(el => el.removeAttribute('style'));
+  tmp.querySelectorAll('[bgcolor]').forEach(el => el.removeAttribute('bgcolor'));
+  tmp.querySelectorAll('table').forEach(t => t.classList.add('memo-table'));
+  tmp.querySelectorAll('td,th').forEach(cell => {
+    const up = cell.textContent.trim().toUpperCase();
+    if (up === 'HIGH') cell.innerHTML = '<span class="badge-high">HIGH</span>';
+    else if (up === 'MODERATE') cell.innerHTML = '<span class="badge-moderate">MODERATE</span>';
+    else if (up === 'LOW') cell.innerHTML = '<span class="badge-low">LOW</span>';
+    else cell.innerHTML = cell.innerHTML
+      .replace(/\bHIGH\b/g, '<span class="badge-high">HIGH</span>')
+      .replace(/\bMODERATE\b/g, '<span class="badge-moderate">MODERATE</span>')
+      .replace(/\bLOW\b/g, '<span class="badge-low">LOW</span>');
+  });
+  return tmp.innerHTML;
+}
+
+// Sidebar built from the diagnostic data we actually hold (causes + evidence).
+function buildMemoSidebar() {
+  const t = T[lang];
+  const keys = ['market','equity','manager','performance','career','workload'];
+  const causes = diagnosisData.causes || {};
+  const rows = keys.map((k,i) => ({label:t.causeLabels[i], val:causes[k]||0})).filter(r => r.val>0).sort((a,b) => b.val-a.val);
+  let html = '';
+  if (rows.length) {
+    html += '<div class="sidebar-dark"><div class="sidebar-label">Ước tính nguyên nhân</div>' +
+      rows.map(r => `<div class="sidebar-row"><span class="sidebar-row-name">${escHtml(r.label)}</span><span class="sidebar-row-val">${r.val}%</span></div>`).join('') + '</div>';
+  }
+  const ev = (diagnosisData.evidence || []).slice(0, 6);
+  if (ev.length) {
+    html += '<div class="sidebar-light"><div class="sidebar-label">Bằng chứng chính</div>' +
+      ev.map(e => `<div class="sidebar-flag"><span class="sidebar-flag-dot"></span><span>${escHtml(e.text)}</span></div>`).join('') + '</div>';
+  }
+  return html;
+}
+
 function showMemo() {
   if (!memoReady) return;
-  const content = diagnosisData.memoContent;
-  document.getElementById('memo-content').innerHTML = content
-    ? content
-    : '<div style="padding:20px;color:#C0392B;font-family:sans-serif;">⚠️ Bản ghi nhớ chưa được tạo đầy đủ. Vui lòng gửi thêm tin nhắn "Tạo lại bản ghi nhớ" để thử lại.</div>';
-  document.getElementById('modal-overlay').classList.add('open');
+  const overlay = document.getElementById('modal-overlay');
+  const box = document.getElementById('memo-content');
+  const raw = diagnosisData.memoContent;
+  if (!raw) {
+    box.style.padding = '';
+    box.innerHTML = '<div style="padding:20px;color:#C0392B;font-family:sans-serif;">⚠️ Bản ghi nhớ chưa được tạo đầy đủ. Vui lòng gửi thêm tin nhắn "Tạo lại bản ghi nhớ" để thử lại.</div>';
+    overlay.classList.add('open');
+    return;
+  }
+  const date = new Date().toLocaleDateString('vi-VN');
+  const firstUser = (messages.find(m => m.role === 'user') || {}).content || '';
+  const title = (diagnosisData.problemStatement || firstUser || 'Bản Ghi Nhớ Quyết Định Rewards').trim().slice(0, 120);
+  const t = T[lang];
+  const keys = ['market','equity','manager','performance','career','workload'];
+  const causes = diagnosisData.causes || {};
+  const top = keys.map((k,i) => ({label:t.causeLabels[i], val:causes[k]||0})).sort((a,b) => b.val-a.val)[0];
+  const tags = [];
+  if (top && top.val > 0) tags.push('Nguyên nhân chính: ' + top.label);
+  tags.push('Ngày: ' + date);
+  tags.push('Mật — Ban Điều Hành');
+  const tagsHtml = tags.map(x => `<div class="memo-tag"><span class="memo-tag-dot"></span>${escHtml(x)}</div>`).join('');
+
+  box.style.padding = '0';
+  box.innerHTML = MEMO_STYLE +
+    '<div class="memo-page">' +
+      '<div class="memo-header"><div>' +
+        '<div class="memo-logo-lines"><div class="memo-logo-line"></div><div class="memo-logo-dot"></div><div class="memo-logo-line"></div></div>' +
+        '<div class="memo-logo-clarity">CLARITY</div><div class="memo-logo-intel">INTELLIGENCE</div>' +
+      '</div>' +
+      '<div class="memo-header-meta"><div class="memo-header-meta-label">Rewards Decision Memo</div>' + escHtml(date) + ' · Mật — Chỉ dành cho Ban Điều Hành</div>' +
+      '</div>' +
+      '<div class="memo-gold-line"></div>' +
+      '<div class="memo-title-block"><div class="memo-type-label">Chẩn đoán Rewards &amp; Talent Retention</div>' +
+        '<div class="memo-main-title">' + escHtml(title) + '</div>' +
+        '<div class="memo-tags">' + tagsHtml + '</div>' +
+      '</div>' +
+      '<div class="memo-body-grid"><div class="memo-main">' + processMemoHtml(raw) + '</div>' +
+        '<div class="memo-sidebar">' + buildMemoSidebar() + '</div></div>' +
+      '<div class="memo-footer"><div class="memo-footer-left">Rewards Decision OS — Clarity Intelligence © 2025</div>' +
+        '<div class="memo-footer-page">01</div><div class="memo-footer-right">Mật — Chỉ dành cho Ban Điều Hành</div></div>' +
+    '</div>' +
+    '<button class="memo-print-btn" onclick="window.print()" style="position:fixed; bottom:24px; right:24px; background:#1a1a1a; color:#C9A84C; border:none; padding:10px 20px; font-size:11px; font-weight:600; letter-spacing:1.5px; cursor:pointer; z-index:9999;">XUẤT PDF</button>';
+  overlay.classList.add('open');
 }
 function closeMemo(){document.getElementById('modal-overlay').classList.remove('open');}
 function closeMemoOnBg(e){if(e.target===document.getElementById('modal-overlay'))closeMemo();}
