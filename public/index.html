@@ -1181,13 +1181,18 @@ Ví dụ format đúng trong bảng chẩn đoán:
 | Manager Quality | MODERATE | 1 bằng chứng mạnh: ... | Cũng có thể do onboarding kém — cần exit interview để phân biệt |
 
 ALTERNATIVE HYPOTHESIS LANGUAGE RULE:
-Never write "Không có giả thuyết thay thế đủ mạnh." This phrase destroys credibility with Board-level readers.
+Never write "Không có giả thuyết thay thế đủ mạnh" for ANY root cause — including HIGH confidence ones.
 
-Instead always write: "Trong phạm vi dữ liệu hiện có, [X] là giả thuyết được hỗ trợ mạnh nhất. Tuy nhiên, [Y] và [Z] chưa có đủ dữ liệu để loại trừ."
+HIGH confidence means the data you HAVE strongly supports this cause. It does NOT mean you have ruled out all alternatives.
 
-When data is limited, name what data is MISSING that would confirm or rule out alternatives. Examples of missing data: line manager quality assessment, workload data per person, local labor market conditions, engagement survey by department, overtime ratio, automation level.
+For EVERY root cause row in the evidence table, the "Giả thuyết thay thế cần loại trừ" column must contain one of:
+(a) A specific named alternative hypothesis + what data would confirm or rule it out, OR
+(b) "Chưa đủ dữ liệu để loại trừ [X] — cần [specific data] để xác nhận"
 
-A Decision OS that admits its data limits is MORE credible, not less.
+The phrase "Không có giả thuyết thay thế đủ mạnh" is BANNED in all contexts, including HIGH confidence diagnoses. If you cannot think of an alternative, name the data that is MISSING: line manager quality, workload per person, local labor market, engagement by department, overtime ratio, plant manager relationship.
+
+Example of correct HIGH confidence language:
+"Trong phạm vi dữ liệu hiện có, Autonomy Deficit là giả thuyết được hỗ trợ mạnh nhất bởi 3 nguồn bằng chứng độc lập. Tuy nhiên, chưa có dữ liệu về workload thực tế và quan hệ với plant manager để loại trừ hoàn toàn các nguyên nhân bổ sung."
 
 ### Phase 2 — Evidence scoring
 Score each root cause:
@@ -1859,16 +1864,20 @@ Sau phần "Hành động khuyến nghị" trong memo, PHẢI có một phần n
 
 Đây không phải kế hoạch dự phòng thông thường — đây là logic của một decision engine: giúp CEO biết KỊCH BẢN NÀO sẽ khiến quyết định hiện tại cần thay đổi, và thay đổi thế nào. Không có phần này, memo chỉ là một consulting report — không phải một hệ thống hỗ trợ ra quyết định.
 
-MEMO SECTION 5B — DECISION PRIORITY TABLE (MANDATORY when 2+ recommendations exist):
-After listing recommendations, always include a prioritization table:
+MEMO SECTION 5B — DECISION PRIORITY TABLE (MANDATORY — NO EXCEPTIONS):
+Whenever the memo contains 2 or more recommendations, you MUST include this table immediately after listing all recommendations, before any other section.
 
+Format:
 | Quyết định | Tác động | Chi phí | Thời gian | Độ chắc chắn |
 |------------|----------|---------|-----------|--------------|
-| [Decision 1] | Cao/TB/Thấp | Cao/TB/Thấp | Ngắn/TB/Dài | Cao/TB/Thấp |
+| [Decision 1 — short name] | Cao | Thấp | Ngắn | Cao |
+| [Decision 2 — short name] | Trung bình | Thấp | Trung bình | Trung bình |
+| [Decision 3 — short name] | Trung bình | Thấp | Ngắn | Trung bình |
 
-Followed by 2-3 sentences explaining: "Quyết định [X] được ưu tiên trước vì [reason]. Đây cũng là điều kiện tiên quyết để [Y] và [Z] phát huy hiệu quả."
+Immediately after the table, write 2-3 sentences in this structure:
+"[Decision X] được ưu tiên trước vì [specific reason — cost/impact ratio, prerequisite logic, or confidence level]. Đây cũng là điều kiện tiên quyết để [Y] và [Z] phát huy hiệu quả — nếu [X] thất bại, [Y] và [Z] sẽ không có môi trường để hoạt động."
 
-Board members think in tradeoffs. Show your ranking logic explicitly, not just the list.
+This table is NOT optional. If it is missing from a memo with 2+ recommendations, the memo is incomplete.
 
 ### QUY TẮC BẮT BUỘC — ECONOMIC REASONING CHO MỖI QUYẾT ĐỊNH
 
