@@ -393,6 +393,88 @@
 </head>
 <body>
 
+<div id="consent-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#ffffff;max-width:560px;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+
+    <!-- Header -->
+    <div style="background:#1a1a1a;padding:24px 32px;display:flex;align-items:center;gap:12px;">
+      <svg width="40" height="34" viewBox="0 0 56 48" xmlns="http://www.w3.org/2000/svg">
+        <line x1="18" y1="6" x2="18" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="34" y1="6" x2="34" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="26" cy="12" r="3.5" fill="#ffffff"/>
+        <text x="28" y="32" font-family="Inter,sans-serif" font-size="7" font-weight="600" letter-spacing="3" fill="#ffffff" text-anchor="middle">CLARITY</text>
+        <text x="28" y="41" font-family="Inter,sans-serif" font-size="4.5" font-weight="400" letter-spacing="2.5" fill="#888888" text-anchor="middle">INTELLIGENCE</text>
+      </svg>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:#C9A84C;">REWARDS DECISION OS</div>
+        <div style="font-size:10px;color:#888888;margin-top:2px;">Điều khoản sử dụng · Terms of Use</div>
+      </div>
+    </div>
+
+    <!-- Gold line -->
+    <div style="height:2px;background:linear-gradient(90deg,#C9A84C 0%,#E8C97A 50%,#C9A84C 100%);"></div>
+
+    <!-- Content -->
+    <div style="padding:28px 32px;">
+
+      <!-- Language toggle -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;">
+        <button onclick="showConsentLang('vi')" id="consent-vi-btn" style="padding:4px 14px;font-size:11px;font-weight:600;border:1px solid #1a1a1a;background:#1a1a1a;color:#ffffff;border-radius:4px;cursor:pointer;">VI</button>
+        <button onclick="showConsentLang('en')" id="consent-en-btn" style="padding:4px 14px;font-size:11px;font-weight:600;border:1px solid #e5e5e5;background:#ffffff;color:#666666;border-radius:4px;cursor:pointer;">EN</button>
+      </div>
+
+      <!-- Vietnamese content -->
+      <div id="consent-vi">
+        <div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:14px;">Trước khi bắt đầu, vui lòng xác nhận:</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">1.</span>
+            <span><strong>Mục đích:</strong> Thông tin bạn cung cấp được sử dụng duy nhất cho mục đích chẩn đoán và tư vấn Rewards trong phiên làm việc này.</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">2.</span>
+            <span><strong>Bảo mật dữ liệu:</strong> Nội dung cuộc trò chuyện được lưu ẩn danh để cải thiện chất lượng hệ thống. Chúng tôi không chia sẻ dữ liệu với bên thứ ba.</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">3.</span>
+            <span><strong>Thông tin cá nhân:</strong> Không nhập tên, CCCD, thông tin định danh cụ thể của nhân viên. Hãy dùng chức danh hoặc mô tả chung (ví dụ: "Trưởng phòng Kinh doanh").</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">4.</span>
+            <span><strong>Giới hạn trách nhiệm:</strong> Kết quả chẩn đoán mang tính tham khảo. Quyết định cuối cùng thuộc về Ban Điều hành và đội ngũ HR của tổ chức bạn.</span>
+          </div>
+        </div>
+        <button onclick="acceptConsent()" style="width:100%;padding:13px;background:#1a1a1a;color:#C9A84C;border:none;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;">BẮT ĐẦU</button>
+      </div>
+
+      <!-- English content -->
+      <div id="consent-en" style="display:none;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a1a;margin-bottom:14px;">Before you begin, please confirm:</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">1.</span>
+            <span><strong>Purpose:</strong> Information you provide is used solely for Rewards diagnosis and advisory within this session.</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">2.</span>
+            <span><strong>Data privacy:</strong> Conversation content is stored anonymously to improve system quality. We do not share your data with third parties.</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">3.</span>
+            <span><strong>Personal information:</strong> Do not enter names, ID numbers, or identifying details of specific employees. Use titles or general descriptions instead (e.g., "Sales Manager").</span>
+          </div>
+          <div style="display:flex;gap:10px;font-size:12px;color:#444444;line-height:1.6;">
+            <span style="color:#C9A84C;font-weight:700;flex-shrink:0;">4.</span>
+            <span><strong>Limitation of liability:</strong> Diagnostic outputs are advisory in nature. Final decisions rest with your organization's leadership and HR team.</span>
+          </div>
+        </div>
+        <button onclick="acceptConsent()" style="width:100%;padding:13px;background:#1a1a1a;color:#C9A84C;border:none;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;">GET STARTED</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="header-left">
     <button class="cases-toggle-btn" id="cases-toggle-btn" onclick="toggleSidebar()" title="Lịch sử ca">
@@ -2685,6 +2767,34 @@ function useStarter(el){document.getElementById('chat-input').value=el.textConte
 
 // Init
 applyTranslations();
+
+// ─── CONSENT ───────────────────────────────────────────────────
+function showConsentLang(lang) {
+  document.getElementById('consent-vi').style.display = lang === 'vi' ? 'block' : 'none';
+  document.getElementById('consent-en').style.display = lang === 'en' ? 'block' : 'none';
+  document.getElementById('consent-vi-btn').style.background = lang === 'vi' ? '#1a1a1a' : '#ffffff';
+  document.getElementById('consent-vi-btn').style.color = lang === 'vi' ? '#ffffff' : '#666666';
+  document.getElementById('consent-vi-btn').style.borderColor = lang === 'vi' ? '#1a1a1a' : '#e5e5e5';
+  document.getElementById('consent-en-btn').style.background = lang === 'en' ? '#1a1a1a' : '#ffffff';
+  document.getElementById('consent-en-btn').style.color = lang === 'en' ? '#ffffff' : '#666666';
+  document.getElementById('consent-en-btn').style.borderColor = lang === 'en' ? '#1a1a1a' : '#e5e5e5';
+}
+
+function acceptConsent() {
+  localStorage.setItem('ci_consent_accepted', '1');
+  document.getElementById('consent-overlay').style.display = 'none';
+}
+
+// Check consent on load
+(function() {
+  if (localStorage.getItem('ci_consent_accepted')) {
+    document.getElementById('consent-overlay').style.display = 'none';
+  }
+})();
 </script>
+<div style="position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;padding:8px 24px;display:flex;justify-content:space-between;align-items:center;z-index:50;border-top:1px solid #333333;">
+  <div style="font-size:10px;color:#666666;">© 2025 Clarity Intelligence · Rewards Decision OS</div>
+  <div style="font-size:10px;color:#666666;">Dữ liệu được lưu ẩn danh · <a href="#" onclick="document.getElementById('consent-overlay').style.display='flex';return false;" style="color:#C9A84C;text-decoration:none;">Điều khoản sử dụng</a></div>
+</div>
 </body>
 </html>
