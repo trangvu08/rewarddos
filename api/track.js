@@ -70,11 +70,16 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'update_case') {
-      const { case_id } = req.body;
-      await supabase
-        .from('cases')
-        .update({ industry, root_cause, phase_reached, memo_generated })
-        .eq('id', case_id);
+      const { case_id, industry, root_cause, phase_reached, memo_generated, conversation, memo_content } = req.body;
+      const updateData = {};
+      if (industry !== undefined) updateData.industry = industry;
+      if (root_cause !== undefined) updateData.root_cause = root_cause;
+      if (phase_reached !== undefined) updateData.phase_reached = phase_reached;
+      if (memo_generated !== undefined) updateData.memo_generated = memo_generated;
+      if (conversation !== undefined) updateData.conversation = conversation;
+      if (memo_content !== undefined) updateData.memo_content = memo_content;
+
+      await supabase.from('cases').update(updateData).eq('id', case_id);
       return res.status(200).json({ ok: true });
     }
 

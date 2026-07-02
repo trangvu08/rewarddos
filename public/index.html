@@ -1086,7 +1086,9 @@ async function callAIAndHandle(retryCount) {
         phase_reached: parsed.phase !== undefined ? parsed.phase : currentPhase,
         root_cause: topCause,
         memo_generated: true,
-        industry: diagnosisData.industry || null
+        industry: diagnosisData.industry || null,
+        conversation: messages,
+        memo_content: diagnosisData.memoContent || null
       });
     }
   } catch(err) {
