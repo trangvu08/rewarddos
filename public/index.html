@@ -361,7 +361,7 @@
   /* ── MODAL ── */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(36,27,18,0.45);
-    display: none; align-items: center; justify-content: center; z-index: 100; padding: 24px;
+    display: none; align-items: center; justify-content: center; z-index: 100; padding: 16px;
   }
   .modal-overlay.open { display: flex; }
   .modal {
@@ -2585,6 +2585,13 @@ function showMemo() {
   const tagsHtml = tags.map(x => `<div class="memo-tag"><span class="memo-tag-dot"></span>${escHtml(x)}</div>`).join('');
   const split = splitMemoTop(processMemoHtml(raw));
 
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    modal.style.maxWidth = '900px';
+    modal.style.maxHeight = '92vh';
+    modal.style.borderRadius = '8px';
+  }
+
   box.style.padding = '0';
   box.innerHTML = MEMO_STYLE +
     '<div class="memo-page">' +
@@ -2617,7 +2624,15 @@ function showMemo() {
     '<button class="memo-print-btn" onclick="printMemo()" style="position:fixed; bottom:24px; right:24px; background:#1a1a1a; color:#C9A84C; border:none; padding:10px 20px; font-size:11px; font-weight:600; letter-spacing:1.5px; cursor:pointer; z-index:9999;">XUẤT PDF</button>';
   overlay.classList.add('open');
 }
-function closeMemo(){document.getElementById('modal-overlay').classList.remove('open');}
+function closeMemo(){
+  const modal = document.querySelector('.modal');
+  if (modal) {
+    modal.style.maxWidth = '';
+    modal.style.maxHeight = '';
+    modal.style.borderRadius = '';
+  }
+  document.getElementById('modal-overlay').classList.remove('open');
+}
 function closeMemoOnBg(e){if(e.target===document.getElementById('modal-overlay'))closeMemo();}
 function copyMemo(){
   const text=document.getElementById('memo-content').innerText;
