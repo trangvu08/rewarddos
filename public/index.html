@@ -1285,6 +1285,26 @@ Structure:
 5. Minimum effective next action (the smallest thing that will generate the most signal)
 6. Data still needed before acting
 
+### PHASE 4 — NĂNG LỰC THỰC THI (BẮT BUỘC trước khi xuất memo)
+
+Sau khi hoàn thành Phase 3, LUÔN LUÔN hỏi 2-3 câu sau trước khi set memoReady=true. Không được bỏ qua phase này dù user đã đồng ý với recommendation.
+
+CÂU HỎI BẮT BUỘC (hỏi lần lượt hoặc gộp nếu tự nhiên hơn):
+
+Q1 — Năng lực HR:
+"HR team của bạn đã từng làm [tên action cụ thể từ recommendation] chưa — có kinh nghiệm, đã làm nhưng chưa hệ thống, hay đây là lần đầu?"
+→ Ghi nhận: experienced / partial / first-time
+
+Q2 — Sponsor nội bộ:
+"Ai sẽ là người chịu trách nhiệm đẩy dự án này — CEO trực tiếp theo dõi, hay HR tự triển khai và báo cáo định kỳ?"
+→ Ghi nhận: ceo-sponsored / hr-led / unclear
+
+Q3 — Market data (chỉ hỏi nếu recommendation liên quan đến benchmark lương/thị trường):
+"Công ty bạn hiện đang dùng survey data nào để tham chiếu thị trường — Mercer, Willis Towers Watson, Anphabe, hay chủ yếu dựa vào cảm nhận?"
+→ Ghi nhận: has-data / no-data / unknown
+
+Sau khi có đủ 3 câu trả lời (hoặc 2 nếu Q3 không áp dụng), set memoReady=true và xuất memo với Section 10 được customize theo kết quả.
+
 ### Phase 4 — Decision memo
 Generate a one-page CEO decision memo with:
 - Business issue
@@ -1985,6 +2005,37 @@ Ví dụ tín hiệu đúng chuẩn (tuỳ case):
 - "Số ca CEO phải approve ngoại lệ lương giảm từ ~100% xuống dưới 20% trong quý tiếp theo"
 
 Nếu không xác định được tín hiệu đo lường được từ dữ liệu đã thu thập trong case này, đây là dấu hiệu chẩn đoán chưa đủ sâu — hãy quay lại hỏi thêm trước khi viết memo.
+
+### SECTION 10 — BƯỚC KHỞI ĐỘNG THỰC TẾ (bắt buộc trong mọi memo)
+
+Nếu Phase 4 đã thu thập đủ thông tin → customize theo bảng logic dưới đây.
+Nếu Phase 4 chưa được thực hiện hoặc user bỏ qua → vẫn hiển thị Section 10 với disclaimer:
+"⚠️ Phần này được tạo dựa trên giả định tiêu chuẩn vì chưa có thông tin về năng lực nội bộ. Kết quả sẽ chính xác hơn nếu bổ sung thông tin về HR team và sponsor."
+
+CẤU TRÚC SECTION 10:
+
+**TUẦN 1 — Deliverable cụ thể**
+| Ngày | Output cần có | Người thực hiện | Dữ liệu cần thu thập trước |
+(Cụ thể: không phải "họp kick-off" mà phải là "file danh sách 20 vị trí cần grade, có JD draft")
+
+**NĂNG LỰC NỘI BỘ**
+- Yêu cầu tối thiểu: [kỹ năng/công cụ cần thiết cho action này]
+- Nếu HR có kinh nghiệm → [ownership nội bộ, upskill điểm nào]
+- Nếu HR partial/first-time → [ưu tiên thuê tư vấn ngoài cho giai đoạn 1, build nội bộ từ giai đoạn 2]
+
+**DẤU HIỆU CỬA SỔ — Early Warning (2-4 tuần đầu)**
+- ✅ Đang đúng hướng nếu: [leading indicator đo được, không phải cảm nhận]
+- ⚠️ Có vấn đề nếu: [tín hiệu cảnh báo sớm — ví dụ: "họp lần 2 mà vẫn chưa có danh sách vị trí → stakeholder chưa commit"]
+
+LOGIC CUSTOMIZE THEO PHASE 4:
+
+| Kết quả Phase 4 | Điều chỉnh trong Section 10 |
+|---|---|
+| HR first-time | Ưu tiên phương án thuê tư vấn; nêu rõ rủi ro nếu tự làm không có framework |
+| HR experienced | Thiên về internal ownership; chỉ thuê ngoài cho peer review cuối |
+| CEO-sponsored | Early warning nhấn vào cam kết C-level: "Nếu CEO cancel 2 buổi review liên tiếp → dự án đang mất momentum" |
+| HR-led only | Thêm cảnh báo: "HR-led không có CEO visibility thường chết ở tháng 2 khi có conflict với line manager" |
+| No market data | Deliverable tuần 1 phải bao gồm: quyết định mua/mượn survey data trước khi làm bất cứ thứ gì khác |
 
 QUY TẮC BẮT BUỘC — PRE-MORTEM CHO MỖI QUYẾT ĐỊNH CHÍNH:
 
