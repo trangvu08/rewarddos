@@ -1065,8 +1065,15 @@ async function callAIAndHandle(retryCount) {
     addMessage('ai', parsed.message);
     messages.push({role:'assistant',content:raw});
 
-    if(parsed.phase!==undefined) { setPhase(parsed.phase); updateCaseTracking({ phase_reached: currentPhase }); }
+    if(parsed.phase!==undefined) {
+      setPhase(parsed.phase);
+      updateCaseTracking({
+        phase_reached: parsed.phase,
+        industry: diagnosisData.industry || null
+      });
+    }
     if(parsed.causes) updateCauses(parsed.causes);
+    if(parsed.industry) diagnosisData.industry = parsed.industry;
     if(parsed.evidence) parsed.evidence.forEach(e=>addEvidence(e.text,e.strength));
     if(parsed.memoReady){
       memoReady=true;
@@ -1075,7 +1082,12 @@ async function callAIAndHandle(retryCount) {
       setPhase(4);
       const c = diagnosisData.causes || {};
       const topCause = Object.keys(c).reduce((a,b)=> (c[b]||0) > (c[a]||0) ? b : a, 'market');
-      updateCaseTracking({ phase_reached: currentPhase, root_cause: topCause, memo_generated: true });
+      updateCaseTracking({
+        phase_reached: parsed.phase !== undefined ? parsed.phase : currentPhase,
+        root_cause: topCause,
+        memo_generated: true,
+        industry: diagnosisData.industry || null
+      });
     }
   } catch(err) {
     removeTyping();
@@ -1435,11 +1447,13 @@ Append a small JSON block. When memoReady is true, ALSO append a SEPARATE <MEMO>
   "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
   "evidence": [{"text": "evidence description", "strength": "strong|moderate|weak|none"}],
   "flags": [],
+  "industry": "",
   "memoReady": false
 }
 </JSON>
 
 - phase: 0–4 matching the current diagnostic phase. Advance to phase 2 as soon as you start leaning toward a cause group and emit causes %; do not stay stuck on phase 1 for many turns once evidence points a direction.
+- industry: optional string — the Vietnamese industry/sector name inferred from context (e.g. "Sản xuất", "Bán lẻ", "Công nghệ", "Xuất nhập khẩu", "Ngân hàng"). Emit it as soon as you can infer it; leave "" if still unknown.
 - causes: give a PROVISIONAL % estimate as soon as you have any signal (even a single piece of evidence) — do not leave everything at 0 just because you are not certain. Refine each turn, summing toward 100 as evidence completes. All 0 only on the very first turn when there is no signal at all.
 
 QUY TẮC BẮT BUỘC — CAUSES PHẢI SINH RA TỪ CASE, KHÔNG PHẢI TAXONOMY CỐ ĐỊNH:
@@ -1997,6 +2011,7 @@ LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng ch
   "causes": {"market": 0, "equity": 0, "manager": 0, "performance": 0, "career": 0, "workload": 0},
   "evidence": [{"text": "mô tả bằng chứng", "strength": "strong|moderate|weak|none"}],
   "flags": [],
+  "industry": "",
   "memoReady": false
 }
 </JSON>
@@ -2004,6 +2019,7 @@ LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng ch
 causes: ước tính tỷ lệ % cho từng nguyên nhân. NGAY KHI có manh mối đầu tiên (dù chỉ 1 bằng chứng), hãy đưa ước tính SƠ BỘ phản ánh nghi ngờ hiện tại — KHÔNG để tất cả là 0 chỉ vì chưa chắc chắn. Mỗi lượt sau cập nhật lại theo bằng chứng mới; tổng tiến dần về 100 khi thông tin đầy đủ. Chỉ để tất cả 0 ở lượt đầu khi thực sự chưa có manh mối nào.
 evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trước đó.
 flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner").
+industry: chuỗi tùy chọn — tên ngành/lĩnh vực bằng tiếng Việt suy ra từ ngữ cảnh (vd: "Sản xuất", "Bán lẻ", "Công nghệ", "Xuất nhập khẩu", "Ngân hàng"). Điền ngay khi suy ra được; để "" nếu chưa rõ.
 memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).
 
 QUY TẮC BẮT BUỘC CHO memoReady — VI PHẠM LÀ LỖI NGHIÊM TRỌNG:
