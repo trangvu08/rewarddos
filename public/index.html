@@ -580,8 +580,9 @@ async function checkUsageLimit() {
     const data = await res.json();
     return data.allowed !== false;
   } catch (e) {
-    // Fallback to localStorage if Supabase unavailable
-    return !localStorage.getItem('ci_case_used');
+    // Fallback to localStorage if Supabase unavailable (count-based, matches server < 3)
+    const used = parseInt(localStorage.getItem('ci_case_used') || '0', 10);
+    return used < 3;
   }
 }
 
@@ -594,9 +595,9 @@ async function startCaseTracking() {
     });
     const data = await res.json();
     trackingCaseId = data.case_id;
-    localStorage.setItem('ci_case_used', '1');
+    localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
   } catch (e) {
-    localStorage.setItem('ci_case_used', '1');
+    localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
   }
 }
 
