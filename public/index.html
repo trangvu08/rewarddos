@@ -2225,15 +2225,30 @@ const MEMO_STYLE = `<style id="memo-print-style">
 .memo-section-text { font-size: 11px; line-height: 1.8; color: #333333; }
 .memo-direct-statement { margin: 12px 0; padding: 12px 16px; border-left: 3px solid #C9A84C; background: #fdf9f0; }
 .memo-direct-statement p { font-size: 11px; font-style: italic; line-height: 1.7; color: #1a1a1a; }
-.memo-table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 8px; }
-.memo-table th { font-size: 7px; font-weight: 600; letter-spacing: 1.5px; color: #999999; text-transform: uppercase; padding: 6px 8px; text-align: left; border-bottom: 0.5px solid #e5e5e5; }
-.memo-table td { padding: 7px 8px; color: #333333; border-bottom: 0.5px solid #f0f0f0; vertical-align: top; line-height: 1.5; }
-.memo-table { table-layout: fixed; width: 100%; }
-.memo-table th:nth-child(1), .memo-table td:nth-child(1) { width: 35%; }
-.memo-table th:nth-child(2), .memo-table td:nth-child(2) { width: 15%; }
-.memo-table th:nth-child(3), .memo-table td:nth-child(3) { width: 25%; }
-.memo-table th:nth-child(4), .memo-table td:nth-child(4) { width: 25%; }
-.memo-table td { word-wrap: break-word; overflow-wrap: break-word; }
+.memo-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+.memo-table th, .memo-table td {
+  padding: 7px 10px;
+  color: #333333;
+  border-bottom: 0.5px solid #f0f0f0;
+  vertical-align: top;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+.memo-table th {
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: #999999;
+  text-transform: uppercase;
+  border-bottom: 0.5px solid #e5e5e5;
+  white-space: nowrap;
+}
 .badge-high { display: inline-block; padding: 2px 7px; background: #1a1a1a; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
 .badge-moderate { display: inline-block; padding: 2px 7px; background: #C9A84C; color: #ffffff; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
 .badge-low { display: inline-block; padding: 2px 7px; background: #e5e5e5; color: #666666; font-size: 7px; font-weight: 600; letter-spacing: 1px; border-radius: 2px; }
