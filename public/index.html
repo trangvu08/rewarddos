@@ -2207,11 +2207,6 @@ const MEMO_STYLE = `<style id="memo-print-style">
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
 .memo-page { width: 100%; max-width: 794px; margin: 0 auto; background: #ffffff; font-family: 'Inter', sans-serif; color: #1a1a1a; position: relative; }
 .memo-header { background: #1a1a1a; padding: 28px 48px 24px; display: flex; justify-content: space-between; align-items: flex-start; }
-.memo-logo-lines { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.memo-logo-line { width: 2px; height: 18px; background: #ffffff; }
-.memo-logo-dot { width: 6px; height: 6px; background: #ffffff; border-radius: 50%; }
-.memo-logo-clarity { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: #ffffff; }
-.memo-logo-intel { font-size: 7px; font-weight: 400; letter-spacing: 2.5px; color: #888888; margin-top: 1px; }
 .memo-header-meta { text-align: right; font-size: 10px; color: #aaaaaa; line-height: 1.8; }
 .memo-header-meta-label { font-size: 7px; font-weight: 600; letter-spacing: 2px; color: #C9A84C; text-transform: uppercase; margin-bottom: 4px; }
 .memo-gold-line { height: 3px; background: linear-gradient(90deg, #C9A84C 0%, #E8C97A 50%, #C9A84C 100%); }
@@ -2278,7 +2273,7 @@ const MEMO_STYLE = `<style id="memo-print-style">
 @media print {
   html, body { height: auto !important; overflow: visible !important; margin: 0; padding: 0; }
   body * { visibility: hidden; }
-  .memo-page, .memo-page * { visibility: visible; }
+  .memo-page, .memo-page * { visibility: visible; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .memo-page { position: absolute; left: 0; top: 0; width: 100%; max-width: 100%; box-shadow: none; page-break-inside: auto; }
   .memo-section { page-break-inside: avoid; }
   .memo-table tr { page-break-inside: avoid; }
@@ -2399,8 +2394,13 @@ function showMemo() {
   box.innerHTML = MEMO_STYLE +
     '<div class="memo-page">' +
       '<div class="memo-header"><div>' +
-        '<div class="memo-logo-lines"><div class="memo-logo-line"></div><div class="memo-logo-dot"></div><div class="memo-logo-line"></div></div>' +
-        '<div class="memo-logo-clarity">CLARITY</div><div class="memo-logo-intel">INTELLIGENCE</div>' +
+        '<svg width="56" height="48" viewBox="0 0 56 48" xmlns="http://www.w3.org/2000/svg">' +
+        '<line x1="18" y1="6" x2="18" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<line x1="34" y1="6" x2="34" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>' +
+        '<circle cx="26" cy="12" r="3.5" fill="#ffffff"/>' +
+        '<text x="28" y="32" font-family="Inter,sans-serif" font-size="7" font-weight="600" letter-spacing="3" fill="#ffffff" text-anchor="middle">CLARITY</text>' +
+        '<text x="28" y="41" font-family="Inter,sans-serif" font-size="4.5" font-weight="400" letter-spacing="2.5" fill="#888888" text-anchor="middle">INTELLIGENCE</text>' +
+        '</svg>' +
       '</div>' +
       '<div class="memo-header-meta"><div class="memo-header-meta-label">Rewards Decision Memo</div>' + escHtml(date) + ' · Mật — Chỉ dành cho Ban Điều Hành</div>' +
       '</div>' +
