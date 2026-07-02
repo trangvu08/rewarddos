@@ -26,6 +26,11 @@ module.exports = async (req, res) => {
     }
 
     if (action === 'check_limit') {
+      // Whitelist: owner devices always allowed
+      const OWNER_DEVICES = (process.env.OWNER_DEVICE_IDS || '').split(',').filter(Boolean);
+      if (OWNER_DEVICES.includes(device_id)) {
+        return res.status(200).json({ case_count: 0, allowed: true });
+      }
       const { data, error } = await supabase
         .from('sessions')
         .select('case_count')
