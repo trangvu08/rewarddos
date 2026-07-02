@@ -1290,7 +1290,7 @@ Structure:
 
 Sau khi hoàn thành Phase 3, LUÔN LUÔN hỏi 2-3 câu sau trước khi set memoReady=true. Không được bỏ qua phase này dù user đã đồng ý với recommendation.
 
-CÂU HỎI BẮT BUỘC (hỏi lần lượt hoặc gộp nếu tự nhiên hơn):
+CÂU HỎI BẮT BUỘC (hỏi lần lượt hoặc gộp tự nhiên):
 
 Q1 — Năng lực HR:
 "HR team của bạn đã từng làm [tên action cụ thể từ recommendation] chưa — có kinh nghiệm, đã làm nhưng chưa hệ thống, hay đây là lần đầu?"
@@ -1304,7 +1304,9 @@ Q3 — Market data (chỉ hỏi nếu recommendation liên quan đến benchmark
 "Công ty bạn hiện đang dùng survey data nào để tham chiếu thị trường — Mercer, Willis Towers Watson, Anphabe, hay chủ yếu dựa vào cảm nhận?"
 → Ghi nhận: has-data / no-data / unknown
 
-Sau khi có đủ 3 câu trả lời (hoặc 2 nếu Q3 không áp dụng), set memoReady=true và xuất memo với Section 10 được customize theo kết quả.
+Sau khi có đủ câu trả lời, set memoReady=true và xuất memo với Section 10 được customize theo kết quả Phase 4.
+
+ENFORCEMENT: memoReady KHÔNG ĐƯỢC set true nếu phase < 4. JSON schema phải phản ánh: phase tiến lên 4 sau khi Phase 3 hoàn thành, và chỉ set memoReady=true sau khi Phase 4 hoàn thành.
 
 ### Phase 4 — Decision memo
 Generate a one-page CEO decision memo with:
@@ -2010,33 +2012,30 @@ Nếu không xác định được tín hiệu đo lường được từ dữ l
 ### SECTION 10 — BƯỚC KHỞI ĐỘNG THỰC TẾ (bắt buộc trong mọi memo)
 
 Nếu Phase 4 đã thu thập đủ thông tin → customize theo bảng logic dưới đây.
-Nếu Phase 4 chưa được thực hiện hoặc user bỏ qua → vẫn hiển thị Section 10 với disclaimer:
+Nếu Phase 4 chưa được thực hiện hoặc thiếu dữ liệu → vẫn hiển thị Section 10 với disclaimer đầu section:
 "⚠️ Phần này được tạo dựa trên giả định tiêu chuẩn vì chưa có thông tin về năng lực nội bộ. Kết quả sẽ chính xác hơn nếu bổ sung thông tin về HR team và sponsor."
 
 CẤU TRÚC SECTION 10:
 
-**TUẦN 1 — Deliverable cụ thể**
-| Ngày | Output cần có | Người thực hiện | Dữ liệu cần thu thập trước |
-(Cụ thể: không phải "họp kick-off" mà phải là "file danh sách 20 vị trí cần grade, có JD draft")
+TUẦN 1 — Deliverable cụ thể
+Bảng 3 cột: Ngày | Output cần có | Người thực hiện | Dữ liệu cần thu thập trước
+Yêu cầu: cụ thể đến mức hành động được — không phải "họp kick-off" mà là "file danh sách vị trí cần grade có JD draft", không phải "review lương" mà là "bảng compa-ratio toàn bộ engineering team so với P50 Mercer".
 
-**NĂNG LỰC NỘI BỘ**
+NĂNG LỰC NỘI BỘ
 - Yêu cầu tối thiểu: [kỹ năng/công cụ cần thiết cho action này]
-- Nếu HR có kinh nghiệm → [ownership nội bộ, upskill điểm nào]
-- Nếu HR partial/first-time → [ưu tiên thuê tư vấn ngoài cho giai đoạn 1, build nội bộ từ giai đoạn 2]
+- Nếu HR experienced → internal ownership, chỉ ra điểm cần upskill
+- Nếu HR partial/first-time → ưu tiên thuê tư vấn ngoài giai đoạn 1, build nội bộ từ giai đoạn 2; nêu rõ rủi ro nếu tự làm không có framework
 
-**DẤU HIỆU CỬA SỔ — Early Warning (2-4 tuần đầu)**
+DẤU HIỆU CỬA SỔ — Early Warning (2-4 tuần đầu)
 - ✅ Đang đúng hướng nếu: [leading indicator đo được, không phải cảm nhận]
-- ⚠️ Có vấn đề nếu: [tín hiệu cảnh báo sớm — ví dụ: "họp lần 2 mà vẫn chưa có danh sách vị trí → stakeholder chưa commit"]
+- ⚠️ Có vấn đề nếu: [tín hiệu cảnh báo sớm cụ thể — ví dụ: "họp lần 2 mà vẫn chưa có danh sách vị trí → stakeholder chưa commit"]
 
 LOGIC CUSTOMIZE THEO PHASE 4:
-
-| Kết quả Phase 4 | Điều chỉnh trong Section 10 |
-|---|---|
-| HR first-time | Ưu tiên phương án thuê tư vấn; nêu rõ rủi ro nếu tự làm không có framework |
-| HR experienced | Thiên về internal ownership; chỉ thuê ngoài cho peer review cuối |
-| CEO-sponsored | Early warning nhấn vào cam kết C-level: "Nếu CEO cancel 2 buổi review liên tiếp → dự án đang mất momentum" |
-| HR-led only | Thêm cảnh báo: "HR-led không có CEO visibility thường chết ở tháng 2 khi có conflict với line manager" |
-| No market data | Deliverable tuần 1 phải bao gồm: quyết định mua/mượn survey data trước khi làm bất cứ thứ gì khác |
+- HR first-time → ưu tiên thuê tư vấn; cảnh báo rủi ro tự làm
+- HR experienced → internal ownership; peer review cuối
+- CEO-sponsored → early warning nhấn vào cam kết C-level: "Nếu CEO cancel 2 buổi review liên tiếp → dự án mất momentum"
+- HR-led only → thêm cảnh báo: "HR-led không có CEO visibility thường chết ở tháng 2 khi conflict với line manager"
+- No market data → deliverable tuần 1 phải bao gồm quyết định mua/mượn survey data trước mọi bước khác
 
 QUY TẮC BẮT BUỘC — PRE-MORTEM CHO MỖI QUYẾT ĐỊNH CHÍNH:
 
