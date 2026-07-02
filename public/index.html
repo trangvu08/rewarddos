@@ -552,8 +552,63 @@ let currentPhase = 0;
 let diagnosisData = { causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0}, evidence:[], memoContent:null, problemStatement:'' };
 let isTyping = false;
 let memoReady = false;
-let currentCaseId = null;  // null = unsaved new case
+let currentCaseId = null;  // null = unsaved new case (localStorage persistence id)
 let sidebarOpen = false;
+
+// ─── SUPABASE ANONYMOUS TRACKING ───────────────────────────────
+// Device ID — persistent anonymous identifier
+function getDeviceId() {
+  let id = localStorage.getItem('ci_device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+    localStorage.setItem('ci_device_id', id);
+  }
+  return id;
+}
+
+const DEVICE_ID = getDeviceId();
+let trackingCaseId = null;  // Supabase case id for the current conversation
+
+async function checkUsageLimit() {
+  try {
+    const res = await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'check_limit', device_id: DEVICE_ID })
+    });
+    const data = await res.json();
+    return data.allowed !== false;
+  } catch (e) {
+    // Fallback to localStorage if Supabase unavailable
+    return !localStorage.getItem('ci_case_used');
+  }
+}
+
+async function startCaseTracking() {
+  try {
+    const res = await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start_case', device_id: DEVICE_ID })
+    });
+    const data = await res.json();
+    trackingCaseId = data.case_id;
+    localStorage.setItem('ci_case_used', '1');
+  } catch (e) {
+    localStorage.setItem('ci_case_used', '1');
+  }
+}
+
+async function updateCaseTracking(updates) {
+  if (!trackingCaseId) return;
+  try {
+    await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update_case', case_id: trackingCaseId, device_id: DEVICE_ID, ...updates })
+    });
+  } catch (e) { /* silent fail */ }
+}
 
 // ─── TRANSLATIONS ──────────────────────────────────────────────
 const T = {
@@ -940,10 +995,25 @@ async function sendMessage() {
   const input=document.getElementById('chat-input');
   const text=input.value.trim();
   if(!text||isTyping) return;
+
+  // First message of a fresh conversation = a new case. Gate on the free limit.
+  const isNewCase = messages.length === 0 && !trackingCaseId;
+  if (isNewCase) {
+    const allowed = await checkUsageLimit();
+    if (!allowed) {
+      addMessage('ai', lang==='vi'
+        ? 'Bạn đã dùng hết lượt phân tích miễn phí. Vui lòng liên hệ để tiếp tục sử dụng.'
+        : "You've used your free analysis. Please get in touch to continue.");
+      return;
+    }
+  }
+
   input.value=''; autoResize(input);
   addMessage('user',text);
   messages.push({role:'user',content:text});
   isTyping=true; document.getElementById('send-btn').disabled=true; showTyping();
+
+  if (isNewCase) await startCaseTracking();
 
   await callAIAndHandle(0);
 
@@ -993,7 +1063,7 @@ async function callAIAndHandle(retryCount) {
     addMessage('ai', parsed.message);
     messages.push({role:'assistant',content:raw});
 
-    if(parsed.phase!==undefined) setPhase(parsed.phase);
+    if(parsed.phase!==undefined) { setPhase(parsed.phase); updateCaseTracking({ phase_reached: currentPhase }); }
     if(parsed.causes) updateCauses(parsed.causes);
     if(parsed.evidence) parsed.evidence.forEach(e=>addEvidence(e.text,e.strength));
     if(parsed.memoReady){
@@ -1001,6 +1071,9 @@ async function callAIAndHandle(retryCount) {
       document.getElementById('memo-btn').disabled=false;
       diagnosisData.memoContent=parsed.memo;
       setPhase(4);
+      const c = diagnosisData.causes || {};
+      const topCause = Object.keys(c).reduce((a,b)=> (c[b]||0) > (c[a]||0) ? b : a, 'market');
+      updateCaseTracking({ phase_reached: currentPhase, root_cause: topCause, memo_generated: true });
     }
   } catch(err) {
     removeTyping();
@@ -2334,7 +2407,7 @@ function resetUIOnly() {
 }
 
 function resetConversation() {
-  messages=[]; currentPhase=0; memoReady=false; currentCaseId=null;
+  messages=[]; currentPhase=0; memoReady=false; currentCaseId=null; trackingCaseId=null;
   diagnosisData={causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0},evidence:[],memoContent:null,problemStatement:''};
   resetUIOnly();
   if(sidebarOpen) {
