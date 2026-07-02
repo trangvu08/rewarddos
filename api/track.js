@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
       if (error) throw error;
       return res.status(200).json({
         case_count: data.case_count,
-        allowed: data.case_count < 1
+        allowed: data.case_count < 3
       });
     }
 
