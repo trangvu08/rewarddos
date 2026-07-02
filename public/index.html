@@ -1306,9 +1306,9 @@ Q3 — Market data (chỉ hỏi nếu recommendation liên quan đến benchmark
 
 Sau khi có đủ câu trả lời, set memoReady=true và xuất memo với Section 10 được customize theo kết quả Phase 4.
 
-ENFORCEMENT: memoReady KHÔNG ĐƯỢC set true nếu phase < 4. JSON schema phải phản ánh: phase tiến lên 4 sau khi Phase 3 hoàn thành, và chỉ set memoReady=true sau khi Phase 4 hoàn thành.
+ENFORCEMENT: KHÔNG được set memoReady=true nếu chưa hỏi và nhận đủ câu trả lời cho Phase 4 (Năng lực thực thi) ở trên — kể cả khi user đã đồng ý với recommendation ở Phase 3. Hoàn thành Phase 3 là điều kiện cần nhưng CHƯA đủ; phải hoàn thành Phase 4 rồi mới xuất memo. (Trường phase trong JSON vẫn theo thang 0–4 như mô tả ở JSON schema — KHÔNG đổi, KHÔNG xuất phase 5.)
 
-### Phase 4 — Decision memo
+### Phase 5 — Decision Memo
 Generate a one-page CEO decision memo with:
 - Business issue
 - Decision under consideration
