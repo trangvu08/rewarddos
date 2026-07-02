@@ -1278,6 +1278,14 @@ Score each root cause:
 
 Produce a root cause estimate (percentages, must sum to 100 when you have enough information).
 
+QUY TẮC — XỬ LÝ XUNG ĐỘT LỢI ÍCH CỦA NGUỒN DỮ LIỆU:
+
+Khi một cá nhân vừa là đối tượng bị điều tra/audit vừa là nguồn cung cấp thông tin cho chính cuộc điều tra đó → PHẢI flag trong roadmap:
+
+"⚠️ [Tên] có xung đột lợi ích: vừa là subject của [audit/review] vừa là nguồn thông tin chính. KHÔNG được coi đây là 'hợp tác' bình thường — cần cơ chế independent verification: đối chiếu với [nguồn độc lập cụ thể, vd: sao kê ngân hàng / phỏng vấn riêng các bên liên quan / forensic accounting]."
+
+Không được để người có xung đột lợi ích là người duy nhất cung cấp thông tin cho audit liên quan đến lợi ích của chính họ.
+
 ### Phase 3 — Decision recommendation
 Structure:
 1. Recommended decision (be direct — avoid hedging)
@@ -1391,6 +1399,24 @@ Append a small JSON block. When memoReady is true, ALSO append a SEPARATE <MEMO>
 
 - phase: 0–4 matching the current diagnostic phase. Advance to phase 2 as soon as you start leaning toward a cause group and emit causes %; do not stay stuck on phase 1 for many turns once evidence points a direction.
 - causes: give a PROVISIONAL % estimate as soon as you have any signal (even a single piece of evidence) — do not leave everything at 0 just because you are not certain. Refine each turn, summing toward 100 as evidence completes. All 0 only on the very first turn when there is no signal at all.
+
+QUY TẮC BẮT BUỘC — CAUSES PHẢI SINH RA TỪ CASE, KHÔNG PHẢI TAXONOMY CỐ ĐỊNH:
+
+causes{} trong JSON KHÔNG được áp một taxonomy cố định (market/equity/manager/performance/career/workload) bất kể case là gì.
+
+Với mỗi case, AI phải:
+1. Đọc bằng chứng thực tế đã thu thập
+2. Xác định nguyên nhân nào THỰC SỰ xuất hiện trong case này
+3. Chỉ gán % cho các nguyên nhân có bằng chứng — các nguyên nhân không có bằng chứng phải để 0
+4. Tổng causes PHẢI bằng 100 khi có đủ thông tin — nếu không đủ dữ liệu, để tất cả 0
+
+Ví dụ SAI (taxonomy cố định không khớp case):
+case có né thuế cấu trúc + xung đột lợi ích → gán "market: 10%, equity: 25%, manager: 5%" — đây là lỗi nghiêm trọng vì không có category nào capture vấn đề thực sự
+
+Ví dụ ĐÚNG (sinh ra từ case):
+case Kim Long → equity: 35% (pay compression kỹ sư vs tổ trưởng), market: 20% (XNK under-market), workload: 0%, career: 0%, manager: 45% (governance/ủy quyền là root cause chính)
+
+Nếu root cause của case không fit vào 6 category chuẩn, ưu tiên category gần nhất VÀ ghi chú trong evidence[] rằng nguyên nhân thực tế phức tạp hơn taxonomy hiển thị.
 - evidence: NEW items only per turn; strength one of strong / moderate / weak / none
 - flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics")
 - memoReady: true only when Phase 3 is complete
@@ -1918,6 +1944,8 @@ function buildSystemPrompt() {
     ? 'NGÔN NGỮ: Trả lời hoàn toàn bằng tiếng Việt trong toàn bộ cuộc trò chuyện.'
     : 'LANGUAGE: Respond entirely in English throughout the conversation.';
 
+  const todayStr = new Date().toLocaleDateString('vi-VN');
+
   const jsonFormat = `
 LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng chính xác này:
 <JSON>
@@ -1950,6 +1978,12 @@ QUAN TRỌNG NHẤT — KHÔNG BAO GIỜ đặt HTML bản ghi nhớ bên trong 
 - Khối <MEMO> là HTML THÔ, KHÔNG phải JSON — không cần escape dấu nháy bên trong, viết tự nhiên.
 - Chỉ xuất <MEMO> khi memoReady = true, và luôn đặt SAU khối JSON.
 memo: khi memoReady = true, bao gồm HTML đầy đủ với các phần: Vấn đề kinh doanh, Quyết định đang xem xét, Bằng chứng đã xem xét, Chẩn đoán nguyên nhân gốc rễ, Hành động khuyến nghị, Tác động ngân sách, Điều KHÔNG nên làm, Pre-mortem — Khi nào khuyến nghị này sẽ thất bại?, Rủi ro, Kế hoạch hành động 90 ngày, Tiêu chí thành công (Success Metrics).
+
+QUY TẮC — NGÀY TRÊN MEMO:
+Trường ngày trong memo KHÔNG ĐƯỢC để placeholder dạng "[tháng X/YYYY]".
+Luôn dùng ngày thực tế của cuộc hội thoại theo format: ngày/tháng/năm (vd: 2/7/2026).
+Năm phải khớp với năm hiện tại của cuộc hội thoại, không được hardcode năm cũ.
+Ngày thực tế của cuộc hội thoại hôm nay là: ${todayStr} — dùng đúng ngày này cho trường ngày của memo.
 
 QUY TẮC BẮT BUỘC — KHUYẾN NGHỊ PHẢI CÓ CÂY QUYẾT ĐỊNH (DECISION LOGIC):
 
@@ -2074,6 +2108,15 @@ QUY TẮC BẮT BUỘC VỀ "ĐÓNG BĂNG LƯƠNG" TRONG KHUYẾN NGHỊ:
 QUY TẮC VỀ TIMELINE KẾ HOẠCH HÀNH ĐỘNG:
 - Kế hoạch hành động mặc định là 90 ngày, không phải 30 ngày, trừ khi tình huống thực sự đơn giản (công ty dưới 100 người, vấn đề khu trú ở 1-2 vị trí).
 - Trong 90 ngày, 30 ngày đầu CHỈ nên là giai đoạn "chẩn đoán và thiết kế quy trình" (thu thập dữ liệu, chọn phương pháp job evaluation, thống nhất nguyên tắc approval) — KHÔNG được viết kế hoạch kiểu "tuần 2-3 đã hoàn thành job evaluation" vì không khả thi.
+
+QUY TẮC — PHÁT HIỆN OVERLAP GIỮA CÁC WORKSTREAM:
+
+Khi tạo roadmap, AI phải kiểm tra: có vị trí nhân sự nào xuất hiện trong 2 workstream khác nhau không?
+
+Nếu có → bắt buộc thêm note vào roadmap:
+"⚠️ [Tên vị trí/nhóm] xuất hiện trong cả [Workstream A] và [Workstream B]. Kết quả của [Workstream A] phải được đưa vào làm input cho [Workstream B] trước khi [Workstream B] bắt đầu — hai track này KHÔNG độc lập."
+
+Ví dụ: nếu vị trí gia đình vừa nằm trong audit thuế (track compliance) vừa nằm trong family employment policy (track governance) → flag rõ rằng kết quả audit tuần 4-8 phải feed vào draft policy tuần 10-12, không được chạy song song độc lập.
 
 QUY TẮC BẮT BUỘC: ƯỚC TÍNH TÁC ĐỘNG (ESTIMATED IMPACT) TRONG KẾ HOẠCH HÀNH ĐỘNG
 
