@@ -61,6 +61,10 @@ export default async function handler(req, res) {
       return;
     }
 
+    console.error('Request body keys:', Object.keys(req.body));
+    console.error('Messages count:', req.body.messages?.length);
+    console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -93,7 +97,13 @@ export default async function handler(req, res) {
     res.status(200).json(data);
 
   } catch (err) {
-    console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Internal server error', detail: err.message });
+    console.error('Anthropic error status:', err.status);
+    console.error('Anthropic error message:', err.message);
+    console.error('Anthropic error body:', JSON.stringify(err.error));
+    return res.status(500).json({
+      error: err.message,
+      details: err.error,
+      status: err.status
+    });
   }
 }
