@@ -192,7 +192,7 @@
   }
 
   /* ── MAIN ── */
-  .main { display: flex; flex: 1; overflow: hidden; }
+  .main { display: flex; flex: 1; overflow: hidden; padding-bottom: 42px; }
 
   /* ── CHAT PANEL ── */
   .chat-panel {
@@ -393,7 +393,7 @@
 </head>
 <body>
 
-<div id="consent-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;">
+<div id="consent-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;">
   <div style="background:#ffffff;max-width:560px;width:100%;border-radius:12px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
 
     <!-- Header -->
@@ -2787,8 +2787,8 @@ function acceptConsent() {
 
 // Check consent on load
 (function() {
-  if (localStorage.getItem('ci_consent_accepted')) {
-    document.getElementById('consent-overlay').style.display = 'none';
+  if (!localStorage.getItem('ci_consent_accepted')) {
+    document.getElementById('consent-overlay').style.display = 'flex';
   }
 })();
 </script>
