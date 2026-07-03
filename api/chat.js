@@ -65,6 +65,14 @@ export default async function handler(req, res) {
     console.error('Messages count:', req.body.messages?.length);
     console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
 
+    // Keep only last 8 messages to reduce token cost
+    let trimmedMessages = messages.slice(-8);
+    // Anthropic requires the first message to be a user turn — drop a leading
+    // assistant message if the window happens to start mid-exchange.
+    if (trimmedMessages.length && trimmedMessages[0].role !== 'user') {
+      trimmedMessages = trimmedMessages.slice(1);
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -82,7 +90,7 @@ export default async function handler(req, res) {
             cache_control: { type: 'ephemeral' }
           }
         ],
-        messages: messages
+        messages: trimmedMessages
       })
     });
 
