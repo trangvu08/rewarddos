@@ -88,9 +88,14 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Anthropic API error:', response.status, errorText);
-      res.status(response.status).json({ error: 'Upstream API error', detail: errorText });
-      return;
+      let parsed;
+      try { parsed = JSON.parse(errorText); } catch {}
+      console.error('Anthropic 400:', response.status, parsed?.error?.type, parsed?.error?.message);
+      console.error('Full error:', errorText);
+      return res.status(response.status).json({
+        error: 'Upstream API error',
+        detail: parsed?.error || errorText
+      });
     }
 
     const data = await response.json();
