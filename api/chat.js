@@ -65,11 +65,15 @@ export default async function handler(req, res) {
     console.error('Messages count:', req.body.messages?.length);
     console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
 
-    // Keep only last 8 messages to reduce token cost
-    let trimmedMessages = messages.slice(-8);
-    // Anthropic requires the first message to be a user turn — drop a leading
-    // assistant message if the window happens to start mid-exchange.
-    if (trimmedMessages.length && trimmedMessages[0].role !== 'user') {
+    // Keep first message (case context) + last 7 messages
+    let trimmedMessages;
+    if (messages.length <= 8) {
+      trimmedMessages = messages;
+    } else {
+      trimmedMessages = [messages[0], ...messages.slice(-7)];
+    }
+    // Ensure array starts with user role
+    if (trimmedMessages[0]?.role === 'assistant') {
       trimmedMessages = trimmedMessages.slice(1);
     }
 
