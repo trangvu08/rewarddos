@@ -676,6 +676,7 @@ async function checkUsageLimit() {
 }
 
 async function startCaseTracking() {
+  if (trackingCaseId) return; // Already started, don't duplicate
   try {
     const res = await fetch('/api/track', {
       method: 'POST',
