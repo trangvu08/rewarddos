@@ -658,6 +658,7 @@ function getDeviceId() {
 
 const DEVICE_ID = getDeviceId();
 let trackingCaseId = null;  // Supabase case id for the current conversation
+let startingCase = false;   // synchronous guard: an insert is in flight (closes the pre-await race)
 
 async function checkUsageLimit() {
   try {
@@ -676,7 +677,8 @@ async function checkUsageLimit() {
 }
 
 async function startCaseTracking() {
-  if (trackingCaseId) return; // Already started, don't duplicate
+  if (trackingCaseId || startingCase) return; // already started or in flight — don't duplicate
+  startingCase = true;                        // set BEFORE any await, so a concurrent call bails immediately
   try {
     const res = await fetch('/api/track', {
       method: 'POST',
@@ -688,6 +690,8 @@ async function startCaseTracking() {
     localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
   } catch (e) {
     localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
+  } finally {
+    startingCase = false;
   }
 }
 
