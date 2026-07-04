@@ -1150,7 +1150,7 @@ async function callAIAndHandle(retryCount) {
 
     const resp=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({max_tokens:12000,system:buildSystemPrompt(),messages:trimmedForAPI})
+      body:JSON.stringify({max_tokens:(currentPhase>=2)?10000:4000,system:buildSystemPrompt(),messages:trimmedForAPI})
     });
 
     if (resp.status === 429) {
