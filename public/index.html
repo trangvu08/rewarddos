@@ -1152,11 +1152,17 @@ async function callAIAndHandle(retryCount) {
     addMessage('ai', parsed.message);
     messages.push({role:'assistant',content:raw});
 
+    // Accumulate risk flags across turns (union, de-duped) so we never clobber earlier ones
+    if(parsed.flags && parsed.flags.length) {
+      diagnosisData.flags = Array.from(new Set([...(diagnosisData.flags || []), ...parsed.flags]));
+    }
+
     if(parsed.phase!==undefined) {
       setPhase(parsed.phase);
       updateCaseTracking({
         phase_reached: parsed.phase,
-        industry: diagnosisData.industry || null
+        industry: diagnosisData.industry || null,
+        flags: diagnosisData.flags || null
       });
     }
     if(parsed.causes) updateCauses(parsed.causes);
@@ -1174,6 +1180,7 @@ async function callAIAndHandle(retryCount) {
         root_cause: topCause,
         memo_generated: true,
         industry: diagnosisData.industry || null,
+        flags: diagnosisData.flags || null,
         conversation: messages,
         memo_content: diagnosisData.memoContent || null
       });
@@ -1396,6 +1403,8 @@ Khi case liên quan đến đội bán hàng, AI phải hỏi:
 4. Threshold và cap được đặt ở đâu? Tỷ lệ nhân viên đạt cap là bao nhiêu? (nếu >15% → quota vấn đề)
 5. Quota được đặt theo phương pháp nào? Có được điều chỉnh giữa năm không?
 6. Thời điểm trả thưởng so với thời điểm bán cách nhau bao lâu? (>1 quý là dấu hiệu nguy hiểm)
+
+Khi phát hiện bất kỳ bẫy thiết kế SIP nào ở trên (NHÓM 5) hoặc câu trả lời cho thấy vấn đề thiết kế (>3 KPI, chỉ số chính <50% trọng số, commission trả trên recurring revenue, >15% nhân viên đạt cap, trả thưởng chậm >1 quý so với thời điểm bán), BẮT BUỘC thêm "sip_design_issue" vào mảng "flags" trong JSON.
 
 ---
 
@@ -1651,7 +1660,7 @@ case Kim Long → equity: 35% (pay compression kỹ sư vs tổ trưởng), mark
 
 Nếu root cause của case không fit vào 6 category chuẩn, ưu tiên category gần nhất VÀ ghi chú trong evidence[] rằng nguyên nhân thực tế phức tạp hơn taxonomy hiển thị.
 - evidence: NEW items only per turn; strength one of strong / moderate / weak / none
-- flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics")
+- flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "sip_design_issue")
 - memoReady: true only when Phase 3 is complete
 
 CRITICAL — NEVER put the HTML memo inside the JSON. The memo HTML contains double-quotes and newlines that break JSON parsing. The JSON must stay short and valid. When memoReady is true, output the full HTML memo ONLY inside a <MEMO> block placed AFTER the </JSON> tag, like this:
@@ -2195,7 +2204,7 @@ LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng ch
 
 causes: ước tính tỷ lệ % cho từng nguyên nhân. NGAY KHI có manh mối đầu tiên (dù chỉ 1 bằng chứng), hãy đưa ước tính SƠ BỘ phản ánh nghi ngờ hiện tại — KHÔNG để tất cả là 0 chỉ vì chưa chắc chắn. Mỗi lượt sau cập nhật lại theo bằng chứng mới; tổng tiến dần về 100 khi thông tin đầy đủ. Chỉ để tất cả 0 ở lượt đầu khi thực sự chưa có manh mối nào.
 evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trước đó.
-flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner").
+flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner", "sip_design_issue").
 industry: chuỗi tùy chọn — tên ngành/lĩnh vực bằng tiếng Việt suy ra từ ngữ cảnh (vd: "Sản xuất", "Bán lẻ", "Công nghệ", "Xuất nhập khẩu", "Ngân hàng"). Điền ngay khi suy ra được; để "" nếu chưa rõ.
 memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).
 
