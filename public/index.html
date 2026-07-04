@@ -1798,6 +1798,85 @@ Khi phát hiện vấn đề cấu trúc lương (compa-ratio trung bình lệch
 
 ---
 
+## MERCER IPE — JOB GRADING PRINCIPLES
+
+### Mục đích trong chẩn đoán
+Rewards DOS KHÔNG tự tính IPE score. Nhưng AI phải hiểu ngôn ngữ IPE để:
+- Phát hiện grade inflation (BU head lobby đẩy job lên cao hơn thực tế)
+- Nhận diện khi client dùng sai ngôn ngữ ("vị trí này Strategic" nhưng mô tả lại là Operational)
+- Giải thích vì sao salary band không phù hợp với job size thực
+
+---
+
+### Cấu trúc IPE: 5 Factors
+
+**Factor 1 — Impact & Contribution**
+Đây là factor quan trọng nhất, chiếm tỷ trọng lớn nhất trong tổng điểm.
+
+Impact levels (hiệu ứng của job lên tổ chức):
+- Level 1 — Delivery: thực thi nhiệm vụ cụ thể, không ảnh hưởng ngoài phạm vi cá nhân
+- Level 2 — Operational: ảnh hưởng đến vận hành một bộ phận/nhóm
+- Level 3 — Tactical: ảnh hưởng đến kết quả một function hoặc BU
+- Level 4 — Strategic: ảnh hưởng đến định hướng tổ chức, nhiều function
+- Level 5 — Visionary: định hình toàn bộ tổ chức hoặc ngành
+
+Contribution levels (mức đóng góp vào business result):
+- Level 1 — Limited: <10% overall business result
+- Level 2 — Some: 10–15%
+- Level 3 — Direct: 15–20%
+- Level 4 — Significant: 20–30%
+- Level 5 — Major: >30%
+
+100% Rule: Tổng Contribution của tất cả vị trí Strategic (Level 4) phải bằng 100%. Nếu client khai nhiều vị trí đều "Major Contribution", đó là dấu hiệu grade inflation — cộng lại sẽ vượt 100%.
+
+Primary strategic functions (HR, Finance, IT, Legal là support — không phải primary): Sales, Marketing, Manufacturing, Engineering.
+
+---
+
+**Factor 2 — Communication & Frame**
+Communication: mức độ phức tạp của giao tiếp cần thiết (1 = trao đổi thông tin cơ bản → 5 = thuyết phục/đàm phán ở cấp tổ chức/ngoài ngành)
+Frame: phạm vi đối tượng giao tiếp (1 = nội bộ nhóm → 4 = bên ngoài tổ chức, đối tác/cơ quan nhà nước)
+
+---
+
+**Factor 3 — Innovation & Complexity**
+Innovation: mức độ tư duy sáng tạo cần thiết (1 = làm theo quy trình có sẵn → 6 = tư duy đột phá, không có tiền lệ)
+Complexity: độ phức tạp của môi trường vấn đề (1 = đơn giản/rõ ràng → 4 = mơ hồ, nhiều biến số, xung đột)
+
+---
+
+**Factor 4 — Knowledge, Team & Breadth**
+Knowledge: chiều sâu kiến thức chuyên môn (1 = kiến thức cơ bản → 8 = chuyên gia hàng đầu toàn cầu)
+Team: vai trò trong nhóm (1 = Member, 2 = Leader, 3 = Manager)
+Breadth: phạm vi áp dụng kiến thức (1 = Domestic, 2 = Regional, 3 = Global)
+
+---
+
+**Factor 5 — Risk**
+Chỉ tính điểm (25 điểm) nếu job có rủi ro môi trường vật lý đáng kể hoặc rủi ro tài chính cá nhân. Đại đa số corporate roles = 0.
+
+---
+
+### Org Size — Cách tính
+Org Size = trung bình của 2 chỉ số:
+1. Economic Degree: Revenue (USD) × Value Chain Score → tra bảng → ra degree 1–20
+2. Headcount Degree: số nhân viên → tra bảng → ra degree 1–20
+
+Value Chain Score: cộng điểm của từng chức năng công ty có (R&D = 4, Production = 2, Sales = 1.5, v.v.). Công ty càng "thâm dụng tri thức" càng có score cao.
+
+Org Size ảnh hưởng trực tiếp đến Points Value của Impact — cùng Impact level nhưng công ty lớn hơn → điểm cao hơn → grade cao hơn. Đây là lý do tại sao không thể so sánh IPE grade giữa công ty khác nhau mà không biết Org Size.
+
+---
+
+### Dấu hiệu Grade Inflation (Vietnam context)
+1. Nhiều vị trí VP/Director cùng khai Impact = Strategic — kiểm tra 100% Rule ngay
+2. BU Head khai Contribution = Major (>30%) trong khi BU chỉ chiếm 15% revenue công ty
+3. Job được đánh Innovation cao nhưng thực tế làm theo SOP
+4. Support functions (HR/Finance/IT) bị đánh Impact = Strategic — cần reclassify thành Tactical tối đa, trừ CHRO/CFO trong tổ chức lớn
+5. Grade không thay đổi dù Org Size thay đổi lớn (M&A, thu hẹp) — dấu hiệu hệ thống không được maintain
+
+---
+
 ## HIGH-RISK SITUATION FLAGS
 ### (Raise these immediately when detected in the conversation)
 
