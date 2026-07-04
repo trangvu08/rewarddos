@@ -115,6 +115,10 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    // Cache verification — read>0 means the ~26k-token prefix is being served from cache.
+    if (process.env.DEBUG_CHAT === '1') {
+      console.error('cache read/create:', data.usage?.cache_read_input_tokens, '/', data.usage?.cache_creation_input_tokens, '| input:', data.usage?.input_tokens);
+    }
     res.status(200).json(data);
 
   } catch (err) {
