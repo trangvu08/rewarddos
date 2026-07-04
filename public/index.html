@@ -864,7 +864,8 @@ async function saveCurrentCase() {
       causes: { ...diagnosisData.causes },
       evidence: [...diagnosisData.evidence],
       memoContent: diagnosisData.memoContent,
-      problemStatement: diagnosisData.problemStatement
+      problemStatement: diagnosisData.problemStatement,
+      flags: [...(diagnosisData.flags || [])]
     },
     updatedAt: Date.now()
   };
@@ -891,7 +892,7 @@ async function loadCase(id) {
     currentPhase = c.phase || 0;
     memoReady = c.memoReady || false;
     messages = c.messages || [];
-    diagnosisData = c.diagnosisData || { causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0}, evidence:[], memoContent:null, problemStatement:'' };
+    diagnosisData = c.diagnosisData || { causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0}, evidence:[], memoContent:null, problemStatement:'', flags:[] };
 
     applyTranslations();
     setPhase(currentPhase);
@@ -906,6 +907,9 @@ async function loadCase(id) {
       document.getElementById('evidence-pending').style.display = 'none';
       diagnosisData.evidence.forEach(e => addEvidence(e.text, e.strength, true));
     }
+
+    // Restore risk flags
+    renderFlags();
 
     // Restore memo button
     if (memoReady) document.getElementById('memo-btn').disabled = false;
