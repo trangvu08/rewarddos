@@ -61,9 +61,13 @@ export default async function handler(req, res) {
       return;
     }
 
-    console.error('Request body keys:', Object.keys(req.body));
-    console.error('Messages count:', req.body.messages?.length);
-    console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
+    // Per-request debug logging — off by default. Set DEBUG_CHAT=1 in the
+    // Vercel env to re-enable (logs full user input, so keep it off in prod).
+    if (process.env.DEBUG_CHAT === '1') {
+      console.error('Request body keys:', Object.keys(req.body));
+      console.error('Messages count:', req.body.messages?.length);
+      console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
+    }
 
     // Keep first message (case context) + last 7 messages
     let trimmedMessages;
