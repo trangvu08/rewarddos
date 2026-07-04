@@ -5,3 +5,5 @@ node_modules
 .vercel
 
 docs/*.pdf
+
+scripts/cases_export.json
