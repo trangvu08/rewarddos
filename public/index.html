@@ -598,6 +598,13 @@
         </div>
       </div>
 
+      <div id="flags-section" style="display:none">
+        <div class="diag-section-title" id="diag-title-flags">Cảnh báo rủi ro</div>
+        <div class="diag-card">
+          <div id="flags-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+      </div>
+
       <button class="memo-btn" id="memo-btn" onclick="showMemo()" disabled>
         📄 <span id="memo-btn-label">Tạo Bản Ghi Nhớ Quyết Định</span>
       </button>
@@ -1026,6 +1033,26 @@ function clearEvidence() {
   diagnosisData.evidence=[];
 }
 
+// ─── RISK FLAGS ────────────────────────────────────────────────
+const FLAG_LABELS = {
+  sip_design_issue:        { vi: 'Vấn đề thiết kế SIP',        en: 'SIP design issue' },
+  founder_setting_salaries:{ vi: 'Founder tự đặt lương',       en: 'Founder sets salaries' },
+  rapid_headcount_growth:  { vi: 'Tăng nhân sự quá nhanh',     en: 'Rapid headcount growth' },
+  no_people_analytics:     { vi: 'Thiếu people analytics',     en: 'No people analytics' },
+  golden_prisoner:         { vi: 'Golden prisoner',            en: 'Golden prisoner' }
+};
+function renderFlags() {
+  const section = document.getElementById('flags-section');
+  const list = document.getElementById('flags-list');
+  const flags = diagnosisData.flags || [];
+  if (!flags.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  list.innerHTML = flags.map(f => {
+    const label = (FLAG_LABELS[f] && FLAG_LABELS[f][lang]) || f;
+    return `<span style="display:inline-block;padding:3px 9px;background:rgba(201,168,76,0.15);border:1px solid var(--gold);border-radius:4px;font-size:11px;color:var(--gold);">⚠️ ${escHtml(label)}</span>`;
+  }).join('');
+}
+
 // ─── CHAT ──────────────────────────────────────────────────────
 const AI_AVATAR_SVG = `<svg width="56" height="48" viewBox="0 0 56 48" xmlns="http://www.w3.org/2000/svg">
   <line x1="18" y1="8" x2="18" y2="22" stroke="#1a1a1a" stroke-width="2.5" stroke-linecap="round"/>
@@ -1155,6 +1182,7 @@ async function callAIAndHandle(retryCount) {
     // Accumulate risk flags across turns (union, de-duped) so we never clobber earlier ones
     if(parsed.flags && parsed.flags.length) {
       diagnosisData.flags = Array.from(new Set([...(diagnosisData.flags || []), ...parsed.flags]));
+      renderFlags();
     }
 
     if(parsed.phase!==undefined) {
@@ -2842,6 +2870,8 @@ function resetUIOnly() {
   document.getElementById('causes-pending').style.display='block';
   document.getElementById('causes-bars').style.display='none';
   clearEvidence();
+  document.getElementById('flags-section').style.display='none';
+  document.getElementById('flags-list').innerHTML='';
   document.getElementById('memo-btn').disabled=true;
   document.getElementById('save-btn').classList.remove('visible');
   const exportBtn = document.getElementById('export-btn');
@@ -2855,7 +2885,7 @@ function resetUIOnly() {
 
 function resetConversation() {
   messages=[]; currentPhase=0; memoReady=false; currentCaseId=null; trackingCaseId=null;
-  diagnosisData={causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0},evidence:[],memoContent:null,problemStatement:''};
+  diagnosisData={causes:{market:0,equity:0,manager:0,performance:0,career:0,workload:0},evidence:[],memoContent:null,problemStatement:'',flags:[]};
   resetUIOnly();
   if(sidebarOpen) {
     document.querySelectorAll('.case-item').forEach(el=>el.classList.remove('active'));
