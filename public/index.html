@@ -1047,6 +1047,7 @@ const FLAG_LABELS = {
   sip_design_issue:        { vi: 'Vấn đề thiết kế SIP',        en: 'SIP design issue' },
   salary_structure_issue:  { vi: 'Vấn đề cấu trúc lương',     en: 'Salary structure issue' },
   stip_design_issue:       { vi: 'Vấn đề thiết kế STIP',      en: 'STIP design issue' },
+  lti_design_issue:        { vi: 'Rủi ro cấu trúc LTI',       en: 'LTI structural risk' },
   founder_setting_salaries:{ vi: 'Founder tự đặt lương',       en: 'Founder sets salaries' },
   rapid_headcount_growth:  { vi: 'Tăng nhân sự quá nhanh',     en: 'Rapid headcount growth' },
   no_people_analytics:     { vi: 'Thiếu people analytics',     en: 'No people analytics' },
@@ -1678,6 +1679,13 @@ Khi case liên quan đến LTI/ESOP/thưởng dài hạn, AI phải hỏi:
 5. LTI hiện tại (nếu có) có vesting schedule và performance condition rõ ràng không?
 6. Ngân sách dành cho LTI là bao nhiêu % tổng lương thưởng của nhóm đối tượng?
 
+Khi phát hiện BẤT KỲ một trong các dấu hiệu sau, BẮT BUỘC thêm "lti_design_issue" vào mảng "flags" trong JSON:
+1. ESOP/LTI không có vesting schedule rõ ràng hoặc không có cliff vesting → nhân sự có thể nhận cổ phần rồi nghỉ ngay
+2. LTI không có performance condition → trở thành thưởng đảm bảo, mất tác dụng alignment
+3. Định giá cổ phần/phantom units không có công thức rõ ràng → rủi ro tranh chấp khi exit
+4. Dùng stock options cho công ty chưa niêm yết mà không có liquidity event rõ ràng → options không có giá trị thực tế
+Khi flag này bật, trong memo nêu rõ theo format: VI "⚠️ Thiết kế LTI có rủi ro cấu trúc — [mô tả vấn đề cụ thể]" / EN "⚠️ LTI structural risk — [specific issue]".
+
 ---
 
 ## THIẾT KẾ CẤU TRÚC LƯƠNG (SALARY STRUCTURE DESIGN)
@@ -2051,7 +2059,7 @@ case Kim Long → equity: 35% (pay compression kỹ sư vs tổ trưởng), mark
 
 Nếu root cause của case không fit vào 6 category chuẩn, ưu tiên category gần nhất VÀ ghi chú trong evidence[] rằng nguyên nhân thực tế phức tạp hơn taxonomy hiển thị.
 - evidence: NEW items only per turn; strength one of strong / moderate / weak / none
-- flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "sip_design_issue", "salary_structure_issue", "stip_design_issue")
+- flags: list any high-risk situation flags detected (e.g. "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "sip_design_issue", "salary_structure_issue", "stip_design_issue", "lti_design_issue")
 - memoReady: true only when Phase 3 is complete
 
 CRITICAL — NEVER put the HTML memo inside the JSON. The memo HTML contains double-quotes and newlines that break JSON parsing. The JSON must stay short and valid. When memoReady is true, output the full HTML memo ONLY inside a <MEMO> block placed AFTER the </JSON> tag, like this:
@@ -2595,7 +2603,7 @@ LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng ch
 
 causes: ước tính tỷ lệ % cho từng nguyên nhân. NGAY KHI có manh mối đầu tiên (dù chỉ 1 bằng chứng), hãy đưa ước tính SƠ BỘ phản ánh nghi ngờ hiện tại — KHÔNG để tất cả là 0 chỉ vì chưa chắc chắn. Mỗi lượt sau cập nhật lại theo bằng chứng mới; tổng tiến dần về 100 khi thông tin đầy đủ. Chỉ để tất cả 0 ở lượt đầu khi thực sự chưa có manh mối nào.
 evidence: chỉ bao gồm bằng chứng MỚI chưa được liệt kê trước đó.
-flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner", "sip_design_issue", "salary_structure_issue", "stip_design_issue").
+flags: danh sách các cờ rủi ro cao đã phát hiện (vd: "founder_setting_salaries", "rapid_headcount_growth", "no_people_analytics", "golden_prisoner", "sip_design_issue", "salary_structure_issue", "stip_design_issue", "lti_design_issue").
 industry: chuỗi tùy chọn — tên ngành/lĩnh vực bằng tiếng Việt suy ra từ ngữ cảnh (vd: "Sản xuất", "Bán lẻ", "Công nghệ", "Xuất nhập khẩu", "Ngân hàng"). Điền ngay khi suy ra được; để "" nếu chưa rõ.
 memoReady: đặt true chỉ khi đã hoàn thành Giai đoạn 3 (Khuyến nghị).`;
 
