@@ -2,6 +2,12 @@
 // Vercel Serverless Function — proxy to Anthropic API
 // Keeps the API key on the server. Never exposed to the browser.
 
+// Memo generation runs at max_tokens=10000 non-streaming and can take 60-120s.
+// The platform default would time it out mid-memo. Set in the file rather than a
+// vercel.json "functions" block: this project uses the legacy "builds" array, and
+// Vercel rejects a config that contains both.
+export const config = { maxDuration: 300 };
+
 // Simple in-memory rate limit (resets on cold start — good enough for friend-testing phase)
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute
@@ -69,12 +75,26 @@ export default async function handler(req, res) {
       console.error('Last message:', JSON.stringify(req.body.messages?.slice(-1)));
     }
 
-    // Keep first message (case context) + last 7 messages
+    // The client prepends a volatile context stub (user "[Context: ...]" + assistant
+    // "Understood.") at index 0-1. Detect it so trimming keeps that pair AND the real
+    // first message (the case context) — otherwise a long conversation silently loses
+    // the case description.
+    const hasContextPrefix =
+      messages.length >= 2 &&
+      messages[0]?.role === 'user' &&
+      typeof messages[0]?.content === 'string' &&
+      messages[0].content.startsWith('[Context:') &&
+      messages[1]?.role === 'assistant';
+
+    const headCount = hasContextPrefix ? 3 : 1;
+
+    // Keep the head (context stub + case context) + last 7 messages. Only trim when
+    // the array is longer than head+7, so head and tail can never overlap.
     let trimmedMessages;
-    if (messages.length <= 8) {
+    if (messages.length <= headCount + 7) {
       trimmedMessages = messages;
     } else {
-      trimmedMessages = [messages[0], ...messages.slice(-7)];
+      trimmedMessages = [...messages.slice(0, headCount), ...messages.slice(-7)];
     }
     // Ensure array starts with user role
     if (trimmedMessages[0]?.role === 'assistant') {
@@ -115,9 +135,18 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    // Cache verification — read>0 means the ~26k-token prefix is being served from cache.
+    // Cache verification. After the first turn of a conversation, read should be
+    // ~29.7k and create should be 0 on EVERY subsequent turn — including across a
+    // phase change. A non-zero create after turn 1 means something is mutating the
+    // system block again and the cache is being re-written at 1.25x.
     if (process.env.DEBUG_CHAT === '1') {
-      console.error('cache read/create:', data.usage?.cache_read_input_tokens, '/', data.usage?.cache_creation_input_tokens, '| input:', data.usage?.input_tokens);
+      const read = data.usage?.cache_read_input_tokens ?? 0;
+      const created = data.usage?.cache_creation_input_tokens ?? 0;
+      console.error(
+        `[cache] ${read > 0 && created === 0 ? 'HIT' : created > 0 ? 'WRITE' : 'MISS'}` +
+        ` read=${read} create=${created} uncached_input=${data.usage?.input_tokens ?? 0}` +
+        ` output=${data.usage?.output_tokens ?? 0}`
+      );
     }
     res.status(200).json(data);
 

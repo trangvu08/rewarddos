@@ -475,6 +475,81 @@
   </div>
 </div>
 
+<!-- ─── EMAIL GATE (mandatory, no close button) ───────────────────────────── -->
+<div id="email-gate-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9998;display:none;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#ffffff;border-radius:10px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.45);">
+
+    <!-- Header -->
+    <div style="background:#1a1a1a;padding:24px 32px;display:flex;align-items:center;gap:12px;">
+      <svg width="40" height="34" viewBox="0 0 56 48" xmlns="http://www.w3.org/2000/svg">
+        <line x1="18" y1="6" x2="18" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="34" y1="6" x2="34" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="26" cy="12" r="3.5" fill="#ffffff"/>
+        <text x="28" y="32" font-family="Inter,sans-serif" font-size="7" font-weight="600" letter-spacing="3" fill="#ffffff" text-anchor="middle">CLARITY</text>
+        <text x="28" y="41" font-family="Inter,sans-serif" font-size="4.5" font-weight="400" letter-spacing="2.5" fill="#888888" text-anchor="middle">INTELLIGENCE</text>
+      </svg>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:#C9A84C;">REWARDS DECISION OS</div>
+        <div style="font-size:10px;color:#888888;margin-top:2px;">Clarity Intelligence</div>
+      </div>
+    </div>
+
+    <!-- Gold line -->
+    <div style="height:2px;background:linear-gradient(90deg,#C9A84C 0%,#E8C97A 50%,#C9A84C 100%);"></div>
+
+    <!-- Content -->
+    <div style="padding:28px 32px;">
+      <div style="font-size:16px;font-weight:600;color:#1a1a1a;line-height:1.4;margin-bottom:10px;">Hệ thống Quyết định trong Lương thưởng</div>
+      <div style="font-size:12.5px;color:#555555;line-height:1.65;margin-bottom:20px;">Nhập email công việc để bắt đầu 2 lượt phân tích miễn phí.</div>
+
+      <label for="email-gate-input" style="display:block;font-size:11px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">Nhập email để bắt đầu phân tích</label>
+      <input id="email-gate-input" type="email" inputmode="email" autocomplete="email" spellcheck="false"
+             placeholder="ten@congty.com"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();submitEmailGate();}"
+             oninput="clearEmailGateError()"
+             style="width:100%;box-sizing:border-box;padding:12px 14px;font-size:13px;font-family:inherit;color:#1a1a1a;background:#ffffff;border:1px solid #e5e5e5;border-radius:6px;outline:none;transition:border-color .15s;"
+             onfocus="this.style.borderColor='#C9A84C'" onblur="this.style.borderColor='#e5e5e5'">
+
+      <div id="email-gate-error" style="display:none;font-size:11.5px;color:#C0392B;margin-top:8px;line-height:1.5;"></div>
+
+      <button id="email-gate-submit" onclick="submitEmailGate()"
+              style="width:100%;margin-top:16px;padding:13px;background:#1a1a1a;color:#C9A84C;border:none;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:opacity .15s;">BẮT ĐẦU MIỄN PHÍ</button>
+
+      <div style="font-size:10.5px;color:#888888;line-height:1.6;margin-top:14px;">Email chỉ dùng để quản lý lượt phân tích. Không gửi thư quảng cáo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── PAYWALL (shown when the free limit is reached) ────────────────────── -->
+<div id="paywall-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:9997;display:none;align-items:center;justify-content:center;padding:24px;">
+  <div style="background:#ffffff;border-radius:10px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.45);">
+    <div style="background:#1a1a1a;padding:24px 32px;display:flex;align-items:center;gap:12px;">
+      <svg width="40" height="34" viewBox="0 0 56 48" xmlns="http://www.w3.org/2000/svg">
+        <line x1="18" y1="6" x2="18" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="34" y1="6" x2="34" y2="20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="26" cy="12" r="3.5" fill="#ffffff"/>
+        <text x="28" y="32" font-family="Inter,sans-serif" font-size="7" font-weight="600" letter-spacing="3" fill="#ffffff" text-anchor="middle">CLARITY</text>
+        <text x="28" y="41" font-family="Inter,sans-serif" font-size="4.5" font-weight="400" letter-spacing="2.5" fill="#888888" text-anchor="middle">INTELLIGENCE</text>
+      </svg>
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:2px;color:#C9A84C;">REWARDS DECISION OS</div>
+        <div style="font-size:10px;color:#888888;margin-top:2px;">Đã hết lượt miễn phí</div>
+      </div>
+    </div>
+    <div style="height:2px;background:linear-gradient(90deg,#C9A84C 0%,#E8C97A 50%,#C9A84C 100%);"></div>
+    <div style="padding:28px 32px;">
+      <div style="font-size:13px;color:#1a1a1a;line-height:1.7;margin-bottom:20px;">
+        Bạn đã sử dụng hết 2 lượt phân tích miễn phí. Liên hệ
+        <a href="mailto:hello@clarityintelligence.co" style="color:#C9A84C;font-weight:600;text-decoration:none;">hello@clarityintelligence.co</a>
+        để tiếp tục.
+      </div>
+      <a href="mailto:hello@clarityintelligence.co"
+         style="display:block;text-align:center;width:100%;box-sizing:border-box;padding:13px;background:#1a1a1a;color:#C9A84C;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:1px;text-decoration:none;">LIÊN HỆ ĐỂ TIẾP TỤC</a>
+      <div id="paywall-email-label" style="font-size:10.5px;color:#888888;margin-top:14px;text-align:center;"></div>
+    </div>
+  </div>
+</div>
+
 <header>
   <div class="header-left">
     <button class="cases-toggle-btn" id="cases-toggle-btn" onclick="toggleSidebar()" title="Lịch sử ca">
@@ -645,51 +720,146 @@ let memoReady = false;
 let currentCaseId = null;  // null = unsaved new case (localStorage persistence id)
 let sidebarOpen = false;
 
-// ─── SUPABASE ANONYMOUS TRACKING ───────────────────────────────
-// Device ID — persistent anonymous identifier
-function getDeviceId() {
-  let id = localStorage.getItem('ci_device_id');
-  if (!id) {
-    id = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
-    localStorage.setItem('ci_device_id', id);
+// ─── SAFE STORAGE ──────────────────────────────────────────────
+// localStorage does not merely return null when unavailable — it THROWS.
+// Safari private mode historically threw QuotaExceededError on setItem, and a
+// "block all cookies" setting makes even reading window.localStorage throw
+// SecurityError. Any such throw at top level would abort this entire inline
+// script, leaving every function below undefined and the page visually intact
+// but completely dead. All storage access goes through these wrappers, which
+// degrade to an in-memory store for the life of the tab.
+const _memStore = {};
+let _lsOk = null; // null = not probed yet
+
+function _lsAvailable() {
+  if (_lsOk !== null) return _lsOk;
+  try {
+    const probe = '__ci_probe__';
+    window.localStorage.setItem(probe, '1');
+    window.localStorage.removeItem(probe);
+    _lsOk = true;
+  } catch (e) {
+    console.warn('localStorage unavailable, falling back to in-memory storage:', e && e.name);
+    _lsOk = false;
   }
-  return id;
+  return _lsOk;
 }
 
-const DEVICE_ID = getDeviceId();
+function lsGet(key) {
+  if (_lsAvailable()) {
+    try { return window.localStorage.getItem(key); }
+    catch (e) { _lsOk = false; }
+  }
+  return key in _memStore ? _memStore[key] : null;
+}
+
+function lsSet(key, value) {
+  const v = String(value);
+  if (_lsAvailable()) {
+    try { window.localStorage.setItem(key, v); return; }
+    catch (e) { _lsOk = false; } // e.g. quota exceeded mid-session
+  }
+  _memStore[key] = v;
+}
+
+function lsRemove(key) {
+  if (_lsAvailable()) {
+    try { window.localStorage.removeItem(key); }
+    catch (e) { _lsOk = false; }
+  }
+  delete _memStore[key];
+}
+
+// ─── IDENTITY ──────────────────────────────────────────────────
+// The free-tier limit is keyed on EMAIL (see api/track.js). device_id survives
+// only as an analytics field on the cases table — it is never used for identity
+// or for any limit decision.
+//
+// Must never throw: this runs at top level, so a throw here kills the whole app.
+function getDeviceId() {
+  try {
+    let id = lsGet('ci_device_id');
+    if (!id) {
+      id = 'dev_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+      lsSet('ci_device_id', id);
+    }
+    return id;
+  } catch (e) {
+    console.warn('getDeviceId failed, using ephemeral id:', e);
+    return 'dev_ephemeral_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+  }
+}
+
+const DEVICE_ID = getDeviceId(); // analytics only
+
+// Normalised the same way the server does (trim + lowercase) so one person can't
+// hold two quotas via Foo@X.com vs foo@x.com.
+function normalizeEmail(raw) {
+  return typeof raw === 'string' ? raw.trim().toLowerCase() : '';
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email) && email.length <= 254;
+}
+
+function getUserEmail() {
+  return normalizeEmail(lsGet('ci_user_email')) || null;
+}
+
+function setUserEmail(email) {
+  lsSet('ci_user_email', normalizeEmail(email));
+}
+
+const FREE_CASE_LIMIT = 2; // display only — api/track.js holds the authoritative value
+
 let trackingCaseId = null;  // Supabase case id for the current conversation
 let startingCase = false;   // synchronous guard: an insert is in flight (closes the pre-await race)
 
 async function checkUsageLimit() {
+  const email = getUserEmail();
+  if (!email) return false; // no email yet — the gate handles this
   try {
     const res = await fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'check_limit', device_id: DEVICE_ID })
+      body: JSON.stringify({ action: 'check_limit', email, device_id: DEVICE_ID })
     });
     const data = await res.json();
     return data.allowed !== false;
   } catch (e) {
-    // Fallback to localStorage if Supabase unavailable (count-based, matches server < 3)
-    const used = parseInt(localStorage.getItem('ci_case_used') || '0', 10);
-    return used < 3;
+    // Fallback to localStorage if Supabase unavailable (count-based, matches server)
+    const used = parseInt(lsGet('ci_case_used') || '0', 10);
+    return used < FREE_CASE_LIMIT;
   }
 }
 
+// Returns true if the case was started (or tracking is unavailable but we're letting
+// the user through), false if the server refused because the free limit is reached.
 async function startCaseTracking() {
-  if (trackingCaseId || startingCase) return; // already started or in flight — don't duplicate
-  startingCase = true;                        // set BEFORE any await, so a concurrent call bails immediately
+  if (trackingCaseId || startingCase) return true; // already started or in flight — don't duplicate
+  const email = getUserEmail();
+  if (!email) return false;                        // no email yet — the gate handles this
+  startingCase = true;                             // set BEFORE any await, so a concurrent call bails immediately
   try {
     const res = await fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'start_case', device_id: DEVICE_ID })
+      body: JSON.stringify({ action: 'start_case', email, device_id: DEVICE_ID })
     });
+    // The server now enforces the free limit here, not just in check_limit. This is
+    // the authoritative answer — check_limit is only an advisory pre-check.
+    if (res.status === 403) return false;
     const data = await res.json();
     trackingCaseId = data.case_id;
-    localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
+    lsSet('ci_case_used', parseInt(lsGet('ci_case_used') || '0', 10) + 1);
+    return true;
   } catch (e) {
-    localStorage.setItem('ci_case_used', String(parseInt(localStorage.getItem('ci_case_used') || '0', 10) + 1));
+    // Tracking unreachable — fail open so a Supabase outage doesn't block the product.
+    // This previously called localStorage.setItem directly INSIDE the catch: if storage
+    // was the thing throwing, the second throw escaped the function and rejected the
+    // send path. lsSet cannot throw.
+    lsSet('ci_case_used', parseInt(lsGet('ci_case_used') || '0', 10) + 1);
+    return true;
   } finally {
     startingCase = false;
   }
@@ -701,9 +871,105 @@ async function updateCaseTracking(updates) {
     await fetch('/api/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'update_case', case_id: trackingCaseId, device_id: DEVICE_ID, ...updates })
+      body: JSON.stringify({ action: 'update_case', case_id: trackingCaseId, email: getUserEmail(), device_id: DEVICE_ID, ...updates })
     });
   } catch (e) { /* silent fail */ }
+}
+
+// ─── EMAIL GATE ────────────────────────────────────────────────
+function showEmailGate() {
+  const overlay = document.getElementById('email-gate-overlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex';
+  const input = document.getElementById('email-gate-input');
+  if (input) setTimeout(() => { try { input.focus(); } catch (e) {} }, 50);
+}
+
+function hideEmailGate() {
+  const overlay = document.getElementById('email-gate-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function clearEmailGateError() {
+  const err = document.getElementById('email-gate-error');
+  if (err) err.style.display = 'none';
+}
+
+function showEmailGateError(msg) {
+  const err = document.getElementById('email-gate-error');
+  if (!err) return;
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+
+async function submitEmailGate() {
+  const input = document.getElementById('email-gate-input');
+  const btn = document.getElementById('email-gate-submit');
+  if (!input || !btn) return;
+
+  const email = normalizeEmail(input.value);
+  if (!isValidEmail(email)) {
+    showEmailGateError('Email không hợp lệ. Vui lòng kiểm tra lại.');
+    try { input.focus(); } catch (e) {}
+    return;
+  }
+
+  clearEmailGateError();
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  btn.style.cursor = 'default';
+  btn.textContent = 'ĐANG XỬ LÝ...';
+
+  try {
+    const res = await fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'register_email', email, device_id: DEVICE_ID })
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showEmailGateError(data.error === 'Invalid email format'
+        ? 'Email không hợp lệ. Vui lòng kiểm tra lại.'
+        : 'Không thể kết nối máy chủ. Vui lòng thử lại.');
+      return;
+    }
+
+    const data = await res.json();
+    // Persist only after the server accepted, so a rejected address doesn't get
+    // cached locally and silently skip the gate on the next visit.
+    setUserEmail(email);
+    hideEmailGate();
+
+    // Already out of cases on a returning email — go straight to the paywall.
+    if (data.allowed === false) showPaywall();
+  } catch (e) {
+    showEmailGateError('Không thể kết nối máy chủ. Vui lòng thử lại.');
+  } finally {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.style.cursor = 'pointer';
+    btn.textContent = originalLabel;
+  }
+}
+
+// ─── PAYWALL ───────────────────────────────────────────────────
+function showPaywall() {
+  const overlay = document.getElementById('paywall-overlay');
+  if (!overlay) return;
+  const label = document.getElementById('paywall-email-label');
+  const email = getUserEmail();
+  if (label && email) label.textContent = email;
+  overlay.style.display = 'flex';
+}
+
+// Decides what the user sees on arrival. Consent runs first, then the email gate —
+// stacking both at once would put two mandatory modals on screen together.
+function initAccessGates() {
+  const consentAccepted = !!lsGet('ci_consent_accepted');
+  if (!consentAccepted) return; // acceptConsent() re-runs this once dismissed
+  if (!getUserEmail()) showEmailGate();
 }
 
 // ─── TRANSLATIONS ──────────────────────────────────────────────
@@ -1119,24 +1385,27 @@ async function sendMessage() {
   const text=input.value.trim();
   if(!text||isTyping) return;
 
+  // No email = no chat. Belt-and-braces behind the mandatory gate modal.
+  if (!getUserEmail()) { showEmailGate(); return; }
+
   // First message of a fresh conversation = a new case. Gate on the free limit.
   const isNewCase = messages.length === 0 && !trackingCaseId;
   if (isNewCase) {
+    // Advisory pre-check — also carries the localStorage fallback for when Supabase
+    // is unreachable.
     const allowed = await checkUsageLimit();
-    if (!allowed) {
-      addMessage('ai', lang==='vi'
-        ? 'Bạn đã dùng hết lượt phân tích miễn phí. Vui lòng liên hệ để tiếp tục sử dụng.'
-        : "You've used your free analysis. Please get in touch to continue.");
-      return;
-    }
+    if (!allowed) { showPaywall(); return; }
+
+    // Authoritative check. Ahead of the user bubble: the server can refuse with 403,
+    // and rendering the message first would strand it in the transcript.
+    const started = await startCaseTracking();
+    if (!started) { showPaywall(); return; }
   }
 
   input.value=''; autoResize(input);
   addMessage('user',text);
   messages.push({role:'user',content:text});
   isTyping=true; document.getElementById('send-btn').disabled=true; showTyping();
-
-  if (isNewCase) await startCaseTracking();
 
   await callAIAndHandle(0);
 
@@ -1145,10 +1414,12 @@ async function sendMessage() {
 
 async function callAIAndHandle(retryCount) {
   try {
-    // Trim before sending to API — keep first message (case context) + last 7
-    const trimmedForAPI = messages.length <= 8
+    // Trim before sending to API — keep first message (case context) + last 7,
+    // then prepend the volatile context stub at index 0-1.
+    const trimmedConvo = messages.length <= 8
       ? messages
       : [messages[0], ...messages.slice(-7)];
+    const trimmedForAPI = [...buildContextPrefix(), ...trimmedConvo];
 
     const resp=await fetch('/api/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -2675,13 +2946,14 @@ BẮT BUỘC: khi công ty có cả hai khối và đang xây job evaluation/gra
 
 `;
 
-function buildSystemPrompt() {
-  const isVi=lang==='vi';
-  const languageInstruction = isVi
-    ? 'NGÔN NGỮ: Trả lời hoàn toàn bằng tiếng Việt trong toàn bộ cuộc trò chuyện.'
-    : 'LANGUAGE: Respond entirely in English throughout the conversation.';
+// CACHE-CRITICAL: this must return the exact same bytes on every request. Prompt
+// caching is a prefix match — one changed character anywhere in the ~29.7k-token
+// system block turns a 0.1x cache read into a 1.25x cache write. Anything volatile
+// (phase, language, date) belongs in buildContextPrefix(), never in here.
+let _systemPromptCache = null;
 
-  const todayStr = new Date().toLocaleDateString('vi-VN');
+function buildSystemPrompt() {
+  if (_systemPromptCache !== null) return _systemPromptCache;
 
   const JSON_SCHEMA = `
 LUÔN trả lời với khối JSON ở cuối tin nhắn theo định dạng chính xác này:
@@ -2723,7 +2995,7 @@ QUY TẮC — NGÀY TRÊN MEMO:
 Trường ngày trong memo KHÔNG ĐƯỢC để placeholder dạng "[tháng X/YYYY]".
 Luôn dùng ngày thực tế của cuộc hội thoại theo format: ngày/tháng/năm (vd: 2/7/2026).
 Năm phải khớp với năm hiện tại của cuộc hội thoại, không được hardcode năm cũ.
-Ngày thực tế của cuộc hội thoại hôm nay là: ${todayStr} — dùng đúng ngày này cho trường ngày của memo.
+Ngày thực tế của cuộc hội thoại được ghi trong khối [Context: ...] ở đầu cuộc hội thoại — dùng đúng ngày đó cho trường ngày của memo.
 
 QUY TẮC BẮT BUỘC — KHUYẾN NGHỊ PHẢI CÓ CÂY QUYẾT ĐỊNH (DECISION LOGIC):
 
@@ -3014,9 +3286,26 @@ TIẾN ĐỘ PHASE VÀ CAUSES (bắt buộc — panel chẩn đoán phải "số
 
 Đừng vội vàng chuyển sang Giai đoạn 3 trước khi thu thập đủ thông tin qua ít nhất 3-4 câu hỏi chẩn đoán.
 
-Giai đoạn hiện tại trong cuộc hội thoại: ${currentPhase}`;
+NGÔN NGỮ, GIAI ĐOẠN HIỆN TẠI VÀ NGÀY: được cung cấp trong khối [Context: ...] ở đầu cuộc hội thoại. Luôn tuân theo ngôn ngữ và giai đoạn ghi trong khối đó.`;
 
-  return PROPRIETARY_KNOWLEDGE + '\n\n---\n\n' + languageInstruction + '\n' + JSON_SCHEMA + '\n' + MEMO_RULES;
+  _systemPromptCache = PROPRIETARY_KNOWLEDGE + '\n\n---\n\n' + JSON_SCHEMA + '\n' + MEMO_RULES;
+  return _systemPromptCache;
+}
+
+// Volatile per-turn context. Lives in the messages array (AFTER the cached system
+// block in render order) so it can change freely without touching the cache.
+// Sonnet 4.6 does not support mid-conversation role:"system" messages, so this uses
+// a user/assistant stub pair. The full language directive rides along here so
+// language steering is no weaker than when it lived in the system prompt.
+function buildContextPrefix() {
+  const todayStr = new Date().toLocaleDateString('vi-VN');
+  const languageInstruction = lang === 'vi'
+    ? 'NGÔN NGỮ: Trả lời hoàn toàn bằng tiếng Việt trong toàn bộ cuộc trò chuyện.'
+    : 'LANGUAGE: Respond entirely in English throughout the conversation.';
+  return [
+    { role: 'user', content: `[Context: Phase ${currentPhase}, Language: ${lang}, Date: ${todayStr}]\n${languageInstruction}` },
+    { role: 'assistant', content: 'Understood.' }
+  ];
 }
 
 // ─── PARSE ─────────────────────────────────────────────────────
@@ -3381,14 +3670,25 @@ function showConsentLang(lang) {
 }
 
 function acceptConsent() {
-  localStorage.setItem('ci_consent_accepted', '1');
+  lsSet('ci_consent_accepted', '1');
   document.getElementById('consent-overlay').style.display = 'none';
+  initAccessGates(); // consent cleared — the email gate is next, if needed
 }
 
-// Check consent on load
+// Access gates on load. This runs at top level, so an unguarded localStorage read
+// here would abort the script the same way getDeviceId could — lsGet cannot throw.
 (function() {
-  if (!localStorage.getItem('ci_consent_accepted')) {
-    document.getElementById('consent-overlay').style.display = 'flex';
+  try {
+    if (!lsGet('ci_consent_accepted')) {
+      document.getElementById('consent-overlay').style.display = 'flex';
+      return; // acceptConsent() chains to the email gate
+    }
+    initAccessGates();
+  } catch (e) {
+    // Never let a gate take the page down; default to showing consent.
+    console.warn('access gate check failed:', e);
+    const overlay = document.getElementById('consent-overlay');
+    if (overlay) overlay.style.display = 'flex';
   }
 })();
 </script>
